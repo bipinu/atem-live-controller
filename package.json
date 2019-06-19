@@ -4,19 +4,34 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/server.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "webpack": "webpack"
+    "build": "rollup -c",
+    "autobuild": "rollup -c -w",
+    "dev": "run-p start:dev autobuild",
+    "start": "sirv public",
+    "start:dev": "sirv public --dev"
   },
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "angular": "~1.4.3",
     "applest-atem": "^0.2.4",
     "body-parser": "^1.18.2",
-    "express": "^4.16.1",
-    "angular": "~1.4.3",
-    "hammerjs": "~2.0.4",
     "copy-webpack-plugin": "^4.0.1",
-    "webpack": "^2.6.1"
+    "express": "^4.16.1",
+    "express-ws": "^4.0.0",
+    "hammerjs": "~2.0.4",
+    "webpack": "^2.6.1",
+    "ws": "^7.0.1"
+  },
+  "devDependencies": {
+    "npm-run-all": "^4.1.5",
+    "rollup": "^1.10.1",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-livereload": "^1.0.0",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-svelte": "^5.0.3",
+    "rollup-plugin-terser": "^4.0.4",
+    "sirv-cli": "^0.4.0",
+    "svelte": "^3.0.0"
   }
 }
