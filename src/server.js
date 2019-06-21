@@ -55,6 +55,10 @@ app.ws('/ws', function(ws, req) {
       const { device } = data.cutTransition;
       switchers[device].cutTransition();
     }
+    if (data.changeTransitionPreview) {
+      const { device, state, me } = data.changeTransitionPreview;
+      switchers[device].changeTransitionPreview(state, me);
+    }
     if (data.changeTransitionPosition) {
       const { device, position }   = data.changeTransitionPosition;
       switchers[device].changeTransitionPosition(position);

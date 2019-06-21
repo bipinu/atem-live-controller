@@ -271,7 +271,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (591:1) {#each switchers[0].visibleChannels as channel}
+    // (598:4) {#each switchers[0].visibleChannels as channel}
     function create_each_block_1(ctx) {
     	var div, t_value = ctx.channel.label, t, dispose;
 
@@ -285,7 +285,7 @@ var app = (function () {
     			t = text(t_value);
     			div.className = "button";
     			toggle_class(div, "red", ctx.isProgramChannel(ctx.channel));
-    			add_location(div, file, 591, 2, 15037);
+    			add_location(div, file, 598, 6, 15201);
     			dispose = listen(div, "click", click_handler);
     		},
 
@@ -315,7 +315,7 @@ var app = (function () {
     	};
     }
 
-    // (600:1) {#each switchers[0].visibleChannels as channel}
+    // (607:4) {#each switchers[0].visibleChannels as channel}
     function create_each_block(ctx) {
     	var div, t_value = ctx.channel.label, t, dispose;
 
@@ -329,7 +329,7 @@ var app = (function () {
     			t = text(t_value);
     			div.className = "button";
     			toggle_class(div, "green", ctx.isPreviewChannel(ctx.channel));
-    			add_location(div, file, 600, 2, 15315);
+    			add_location(div, file, 607, 6, 15502);
     			dispose = listen(div, "click", click_handler_1);
     		},
 
@@ -360,7 +360,7 @@ var app = (function () {
     }
 
     function create_fragment(ctx) {
-    	var section0, h20, t1, div0, t2, section1, h21, t4, div1, t5, section2, h22, t7, div5, div2, t9, div3, t11, div4, t13, section3, h23, t15, div11, div6, t17, div7, t19, div8, t21, br, t22, div9, t24, div10, t26, section4, h24, t28, div18, div12, t30, div13, t32, div14, t34, div15, t36, div16, t38, div17, t40, section5, h25, t42, div20, div19, dispose;
+    	var header, h1, t0_value = ctx.switchers[0]._pin, t0, t1, div30, div2, section0, h20, t3, div0, t4, section1, h21, t6, div1, t7, div17, section2, h22, t9, div7, div3, t10, div4, t12, br0, t13, div5, t15, div6, t17, section3, h23, t19, div16, div8, t21, div9, t23, div10, t25, div11, t27, div12, t29, br1, t30, div13, t32, div14, t34, div15, t36, div29, section4, h24, t38, div26, div21, div18, t40, div19, t42, div20, t44, div25, div22, t46, div23, t48, div24, t50, section5, h25, t52, div28, div27, dispose;
 
     	var each_value_1 = ctx.switchers[0].visibleChannels;
 
@@ -380,192 +380,246 @@ var app = (function () {
 
     	return {
     		c: function create() {
+    			header = element("header");
+    			h1 = element("h1");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			div30 = element("div");
+    			div2 = element("div");
     			section0 = element("section");
     			h20 = element("h2");
     			h20.textContent = "Program";
-    			t1 = space();
+    			t3 = space();
     			div0 = element("div");
 
     			for (var i = 0; i < each_blocks_1.length; i += 1) {
     				each_blocks_1[i].c();
     			}
 
-    			t2 = space();
+    			t4 = space();
     			section1 = element("section");
     			h21 = element("h2");
     			h21.textContent = "Preview";
-    			t4 = space();
+    			t6 = space();
     			div1 = element("div");
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t5 = space();
+    			t7 = space();
+    			div17 = element("div");
     			section2 = element("section");
     			h22 = element("h2");
     			h22.textContent = "Next Transition";
-    			t7 = space();
-    			div5 = element("div");
-    			div2 = element("div");
-    			div2.textContent = "ON AIR";
     			t9 = space();
+    			div7 = element("div");
     			div3 = element("div");
-    			div3.textContent = "BKGD";
-    			t11 = space();
+    			t10 = space();
     			div4 = element("div");
-    			div4.textContent = "Key 1";
+    			div4.textContent = "ON AIR";
+    			t12 = space();
+    			br0 = element("br");
     			t13 = space();
+    			div5 = element("div");
+    			div5.textContent = "BKGD";
+    			t15 = space();
+    			div6 = element("div");
+    			div6.textContent = "Key 1";
+    			t17 = space();
     			section3 = element("section");
     			h23 = element("h2");
     			h23.textContent = "Transition style";
-    			t15 = space();
-    			div11 = element("div");
-    			div6 = element("div");
-    			div6.textContent = "MIX";
-    			t17 = space();
-    			div7 = element("div");
-    			div7.textContent = "DIP";
     			t19 = space();
+    			div16 = element("div");
     			div8 = element("div");
-    			div8.textContent = "WIPE";
+    			div8.textContent = "MIX";
     			t21 = space();
-    			br = element("br");
-    			t22 = space();
     			div9 = element("div");
-    			div9.textContent = "CUT";
-    			t24 = space();
+    			div9.textContent = "DIP";
+    			t23 = space();
     			div10 = element("div");
-    			div10.textContent = "AUTO";
-    			t26 = space();
+    			div10.textContent = "WIPE";
+    			t25 = space();
+    			div11 = element("div");
+    			div11.textContent = "STING";
+    			t27 = space();
+    			div12 = element("div");
+    			div12.textContent = "DVE";
+    			t29 = space();
+    			br1 = element("br");
+    			t30 = space();
+    			div13 = element("div");
+    			div13.textContent = "PREV";
+    			t32 = space();
+    			div14 = element("div");
+    			div14.textContent = "CUT";
+    			t34 = space();
+    			div15 = element("div");
+    			div15.textContent = "AUTO";
+    			t36 = space();
+    			div29 = element("div");
     			section4 = element("section");
     			h24 = element("h2");
     			h24.textContent = "Downstream Key";
-    			t28 = space();
-    			div18 = element("div");
-    			div12 = element("div");
-    			div12.textContent = "TIE";
-    			t30 = space();
-    			div13 = element("div");
-    			div13.textContent = "ON AIR";
-    			t32 = space();
-    			div14 = element("div");
-    			div14.textContent = "AUTO";
-    			t34 = space();
-    			div15 = element("div");
-    			div15.textContent = "TIE";
-    			t36 = space();
-    			div16 = element("div");
-    			div16.textContent = "ON AIR";
     			t38 = space();
-    			div17 = element("div");
-    			div17.textContent = "AUTO";
+    			div26 = element("div");
+    			div21 = element("div");
+    			div18 = element("div");
+    			div18.textContent = "TIE";
     			t40 = space();
+    			div19 = element("div");
+    			div19.textContent = "ON AIR";
+    			t42 = space();
+    			div20 = element("div");
+    			div20.textContent = "AUTO";
+    			t44 = space();
+    			div25 = element("div");
+    			div22 = element("div");
+    			div22.textContent = "TIE";
+    			t46 = space();
+    			div23 = element("div");
+    			div23.textContent = "ON AIR";
+    			t48 = space();
+    			div24 = element("div");
+    			div24.textContent = "AUTO";
+    			t50 = space();
     			section5 = element("section");
     			h25 = element("h2");
     			h25.textContent = "Fade to Black";
-    			t42 = space();
-    			div20 = element("div");
-    			div19 = element("div");
-    			div19.textContent = "FTB";
+    			t52 = space();
+    			div28 = element("div");
+    			div27 = element("div");
+    			div27.textContent = "FTB";
+    			add_location(h1, file, 588, 2, 14972);
+    			header.className = "row";
+    			add_location(header, file, 587, 0, 14949);
     			h20.className = "section";
-    			add_location(h20, file, 588, 1, 14933);
+    			add_location(h20, file, 595, 4, 15087);
     			div0.className = "well";
-    			add_location(div0, file, 589, 1, 14967);
+    			add_location(div0, file, 596, 4, 15124);
     			section0.className = "channels";
-    			add_location(section0, file, 587, 0, 14905);
+    			add_location(section0, file, 594, 2, 15056);
     			h21.className = "section";
-    			add_location(h21, file, 597, 1, 15211);
+    			add_location(h21, file, 604, 4, 15388);
     			div1.className = "well";
-    			add_location(div1, file, 598, 1, 15245);
+    			add_location(div1, file, 605, 4, 15425);
     			section1.className = "channels";
-    			add_location(section1, file, 596, 0, 15183);
+    			add_location(section1, file, 603, 2, 15357);
+    			div2.className = "col-lg-7";
+    			add_location(div2, file, 593, 0, 15031);
     			h22.className = "section";
-    			add_location(h22, file, 606, 1, 15498);
-    			div2.className = "button";
-    			toggle_class(div2, "red", ctx.switchers[0].video.ME[0].upstreamKeyState[0]);
-    			add_location(div2, file, 608, 2, 15561);
-    			div3.className = "button";
-    			toggle_class(div3, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextBackgroundState);
-    			add_location(div3, file, 609, 2, 15693);
+    			add_location(h22, file, 615, 4, 15728);
+    			div3.className = "button-spacer";
+    			add_location(div3, file, 617, 6, 15798);
     			div4.className = "button";
-    			toggle_class(div4, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextState[0]);
-    			add_location(div4, file, 610, 2, 15845);
-    			div5.className = "well";
-    			add_location(div5, file, 607, 1, 15540);
-    			section2.className = "next-transition";
-    			add_location(section2, file, 605, 0, 15463);
-    			h23.className = "section";
-    			add_location(h23, file, 615, 1, 16035);
+    			toggle_class(div4, "red", ctx.switchers[0].video.ME[0].upstreamKeyState[0]);
+    			add_location(div4, file, 618, 6, 15838);
+    			add_location(br0, file, 619, 6, 15974);
+    			div5.className = "button";
+    			toggle_class(div5, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextBackgroundState);
+    			add_location(div5, file, 620, 6, 15985);
     			div6.className = "button";
-    			toggle_class(div6, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==0);
-    			add_location(div6, file, 617, 2, 16099);
-    			div7.className = "button";
-    			toggle_class(div7, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==1);
-    			add_location(div7, file, 618, 2, 16228);
+    			toggle_class(div6, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextState[0]);
+    			add_location(div6, file, 621, 6, 16141);
+    			div7.className = "well";
+    			add_location(div7, file, 616, 4, 15773);
+    			section2.className = "next-transition";
+    			add_location(section2, file, 614, 2, 15690);
+    			h23.className = "section";
+    			add_location(h23, file, 626, 4, 16341);
     			div8.className = "button";
-    			toggle_class(div8, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==2);
-    			add_location(div8, file, 619, 2, 16357);
-    			add_location(br, file, 620, 2, 16487);
+    			toggle_class(div8, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==0);
+    			add_location(div8, file, 628, 6, 16412);
     			div9.className = "button";
-    			add_location(div9, file, 621, 2, 16494);
+    			toggle_class(div9, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==1);
+    			add_location(div9, file, 631, 6, 16565);
     			div10.className = "button";
-    			toggle_class(div10, "red", ctx.switchers[0].video.ME[0].transitionPosition != 0);
-    			add_location(div10, file, 622, 2, 16551);
-    			div11.className = "well";
-    			add_location(div11, file, 616, 1, 16078);
-    			section3.className = "transition";
-    			add_location(section3, file, 614, 0, 16005);
-    			h24.className = "section";
-    			add_location(h24, file, 627, 1, 16712);
+    			toggle_class(div10, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==2);
+    			add_location(div10, file, 634, 6, 16714);
+    			div11.className = "button";
+    			toggle_class(div11, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==3);
+    			toggle_class(div11, "disabled", ctx.switchers[0].topology.numberOfStingers==0);
+    			add_location(div11, file, 637, 6, 16870);
     			div12.className = "button";
-    			toggle_class(div12, "yellow", ctx.switchers[0].video.downstreamKeyTie[0]);
-    			add_location(div12, file, 629, 2, 16774);
+    			toggle_class(div12, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==4);
+    			toggle_class(div12, "disabled", ctx.switchers[0].topology.numberOfDVEs==0);
+    			add_location(div12, file, 641, 6, 17097);
+    			add_location(br1, file, 645, 6, 17318);
     			div13.className = "button";
-    			toggle_class(div13, "red", ctx.switchers[0].video.downstreamKeyOn[0]);
-    			add_location(div13, file, 630, 2, 16900);
+    			add_location(div13, file, 646, 6, 17329);
     			div14.className = "button";
-    			toggle_class(div14, "red", false);
-    			add_location(div14, file, 631, 2, 17024);
+    			add_location(div14, file, 648, 6, 17412);
     			div15.className = "button";
-    			toggle_class(div15, "yellow", ctx.switchers[0].video.downstreamKeyTie[1]);
-    			add_location(div15, file, 633, 2, 17111);
-    			div16.className = "button";
-    			toggle_class(div16, "red", ctx.switchers[0].video.downstreamKeyOn[1]);
-    			add_location(div16, file, 634, 2, 17237);
-    			div17.className = "button";
-    			toggle_class(div17, "red", false);
-    			add_location(div17, file, 635, 2, 17361);
-    			div18.className = "well";
-    			add_location(div18, file, 628, 1, 16753);
-    			section4.className = "dsk";
-    			add_location(section4, file, 626, 0, 16689);
-    			h25.className = "section";
-    			add_location(h25, file, 640, 1, 17488);
+    			toggle_class(div15, "red", ctx.switchers[0].video.ME[0].transitionPosition != 0);
+    			add_location(div15, file, 650, 6, 17484);
+    			div16.className = "well";
+    			add_location(div16, file, 627, 4, 16387);
+    			section3.className = "transition";
+    			add_location(section3, file, 625, 2, 16308);
+    			div17.className = "col-lg-3";
+    			add_location(div17, file, 613, 0, 15665);
+    			h24.className = "section";
+    			add_location(h24, file, 659, 4, 17718);
+    			div18.className = "button";
+    			toggle_class(div18, "yellow", ctx.switchers[0].video.downstreamKeyTie[0]);
+    			add_location(div18, file, 662, 8, 17823);
     			div19.className = "button";
-    			toggle_class(div19, "red", ctx.switchers[0].video.ME[0].fadeToBlack);
-    			add_location(div19, file, 642, 2, 17549);
-    			div20.className = "well";
-    			add_location(div20, file, 641, 1, 17528);
-    			section5.className = "ftb";
-    			add_location(section5, file, 639, 0, 17465);
+    			toggle_class(div19, "red", ctx.switchers[0].video.downstreamKeyOn[0]);
+    			add_location(div19, file, 663, 8, 17955);
+    			div20.className = "button";
+    			toggle_class(div20, "red", false);
+    			add_location(div20, file, 664, 8, 18085);
+    			div21.className = "button-column";
+    			add_location(div21, file, 661, 6, 17787);
+    			div22.className = "button";
+    			toggle_class(div22, "yellow", ctx.switchers[0].video.downstreamKeyTie[1]);
+    			add_location(div22, file, 667, 8, 18224);
+    			div23.className = "button";
+    			toggle_class(div23, "red", ctx.switchers[0].video.downstreamKeyOn[1]);
+    			add_location(div23, file, 668, 8, 18356);
+    			div24.className = "button";
+    			toggle_class(div24, "red", false);
+    			add_location(div24, file, 669, 8, 18486);
+    			div25.className = "button-column";
+    			add_location(div25, file, 666, 6, 18188);
+    			div26.className = "well";
+    			add_location(div26, file, 660, 4, 17762);
+    			section4.className = "downstream-key";
+    			add_location(section4, file, 658, 2, 17681);
+    			h25.className = "section";
+    			add_location(h25, file, 675, 4, 18646);
+    			div27.className = "button";
+    			toggle_class(div27, "red", ctx.switchers[0].video.ME[0].fadeToBlack);
+    			add_location(div27, file, 677, 6, 18714);
+    			div28.className = "well";
+    			add_location(div28, file, 676, 4, 18689);
+    			section5.className = "fade-to-black";
+    			add_location(section5, file, 674, 2, 18610);
+    			div29.className = "col-lg-2";
+    			add_location(div29, file, 657, 0, 17656);
+    			div30.className = "row";
+    			add_location(div30, file, 591, 0, 15012);
 
     			dispose = [
-    				listen(div2, "click", ctx.click_handler_2),
-    				listen(div3, "click", ctx.click_handler_3),
-    				listen(div4, "click", ctx.click_handler_4),
-    				listen(div6, "click", ctx.click_handler_5),
-    				listen(div7, "click", ctx.click_handler_6),
-    				listen(div8, "click", ctx.click_handler_7),
-    				listen(div9, "click", ctx.cutTransition),
-    				listen(div10, "click", ctx.autoTransition),
-    				listen(div12, "click", ctx.click_handler_8),
-    				listen(div13, "click", ctx.click_handler_9),
-    				listen(div14, "click", ctx.click_handler_10),
-    				listen(div15, "click", ctx.click_handler_11),
-    				listen(div16, "click", ctx.click_handler_12),
-    				listen(div17, "click", ctx.click_handler_13),
-    				listen(div19, "click", ctx.fadeToBlack)
+    				listen(div4, "click", ctx.click_handler_2),
+    				listen(div5, "click", ctx.click_handler_3),
+    				listen(div6, "click", ctx.click_handler_4),
+    				listen(div8, "click", ctx.click_handler_5),
+    				listen(div9, "click", ctx.click_handler_6),
+    				listen(div10, "click", ctx.click_handler_7),
+    				listen(div11, "click", ctx.click_handler_8),
+    				listen(div12, "click", ctx.click_handler_9),
+    				listen(div13, "click", ctx.changeTransitionPreview),
+    				listen(div14, "click", ctx.cutTransition),
+    				listen(div15, "click", ctx.autoTransition),
+    				listen(div18, "click", ctx.click_handler_10),
+    				listen(div19, "click", ctx.click_handler_11),
+    				listen(div20, "click", ctx.click_handler_12),
+    				listen(div22, "click", ctx.click_handler_13),
+    				listen(div23, "click", ctx.click_handler_14),
+    				listen(div24, "click", ctx.click_handler_15),
+    				listen(div27, "click", ctx.fadeToBlack)
     			];
     		},
 
@@ -574,76 +628,100 @@ var app = (function () {
     		},
 
     		m: function mount(target, anchor) {
-    			insert(target, section0, anchor);
+    			insert(target, header, anchor);
+    			append(header, h1);
+    			append(h1, t0);
+    			insert(target, t1, anchor);
+    			insert(target, div30, anchor);
+    			append(div30, div2);
+    			append(div2, section0);
     			append(section0, h20);
-    			append(section0, t1);
+    			append(section0, t3);
     			append(section0, div0);
 
     			for (var i = 0; i < each_blocks_1.length; i += 1) {
     				each_blocks_1[i].m(div0, null);
     			}
 
-    			insert(target, t2, anchor);
-    			insert(target, section1, anchor);
+    			append(div2, t4);
+    			append(div2, section1);
     			append(section1, h21);
-    			append(section1, t4);
+    			append(section1, t6);
     			append(section1, div1);
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div1, null);
     			}
 
-    			insert(target, t5, anchor);
-    			insert(target, section2, anchor);
+    			append(div30, t7);
+    			append(div30, div17);
+    			append(div17, section2);
     			append(section2, h22);
-    			append(section2, t7);
-    			append(section2, div5);
-    			append(div5, div2);
-    			append(div5, t9);
-    			append(div5, div3);
-    			append(div5, t11);
-    			append(div5, div4);
-    			insert(target, t13, anchor);
-    			insert(target, section3, anchor);
+    			append(section2, t9);
+    			append(section2, div7);
+    			append(div7, div3);
+    			append(div7, t10);
+    			append(div7, div4);
+    			append(div7, t12);
+    			append(div7, br0);
+    			append(div7, t13);
+    			append(div7, div5);
+    			append(div7, t15);
+    			append(div7, div6);
+    			append(div17, t17);
+    			append(div17, section3);
     			append(section3, h23);
-    			append(section3, t15);
-    			append(section3, div11);
-    			append(div11, div6);
-    			append(div11, t17);
-    			append(div11, div7);
-    			append(div11, t19);
-    			append(div11, div8);
-    			append(div11, t21);
-    			append(div11, br);
-    			append(div11, t22);
-    			append(div11, div9);
-    			append(div11, t24);
-    			append(div11, div10);
-    			insert(target, t26, anchor);
-    			insert(target, section4, anchor);
+    			append(section3, t19);
+    			append(section3, div16);
+    			append(div16, div8);
+    			append(div16, t21);
+    			append(div16, div9);
+    			append(div16, t23);
+    			append(div16, div10);
+    			append(div16, t25);
+    			append(div16, div11);
+    			append(div16, t27);
+    			append(div16, div12);
+    			append(div16, t29);
+    			append(div16, br1);
+    			append(div16, t30);
+    			append(div16, div13);
+    			append(div16, t32);
+    			append(div16, div14);
+    			append(div16, t34);
+    			append(div16, div15);
+    			append(div30, t36);
+    			append(div30, div29);
+    			append(div29, section4);
     			append(section4, h24);
-    			append(section4, t28);
-    			append(section4, div18);
-    			append(div18, div12);
-    			append(div18, t30);
-    			append(div18, div13);
-    			append(div18, t32);
-    			append(div18, div14);
-    			append(div18, t34);
-    			append(div18, div15);
-    			append(div18, t36);
-    			append(div18, div16);
-    			append(div18, t38);
-    			append(div18, div17);
-    			insert(target, t40, anchor);
-    			insert(target, section5, anchor);
+    			append(section4, t38);
+    			append(section4, div26);
+    			append(div26, div21);
+    			append(div21, div18);
+    			append(div21, t40);
+    			append(div21, div19);
+    			append(div21, t42);
+    			append(div21, div20);
+    			append(div26, t44);
+    			append(div26, div25);
+    			append(div25, div22);
+    			append(div25, t46);
+    			append(div25, div23);
+    			append(div25, t48);
+    			append(div25, div24);
+    			append(div29, t50);
+    			append(div29, section5);
     			append(section5, h25);
-    			append(section5, t42);
-    			append(section5, div20);
-    			append(div20, div19);
+    			append(section5, t52);
+    			append(section5, div28);
+    			append(div28, div27);
     		},
 
     		p: function update(changed, ctx) {
+    			if ((changed.switchers) && t0_value !== (t0_value = ctx.switchers[0]._pin)) {
+    				set_data(t0, t0_value);
+    			}
+
     			if (changed.isProgramChannel || changed.switchers) {
     				each_value_1 = ctx.switchers[0].visibleChannels;
 
@@ -687,18 +765,22 @@ var app = (function () {
     			}
 
     			if (changed.switchers) {
-    				toggle_class(div2, "red", ctx.switchers[0].video.ME[0].upstreamKeyState[0]);
-    				toggle_class(div3, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextBackgroundState);
-    				toggle_class(div4, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextState[0]);
-    				toggle_class(div6, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==0);
-    				toggle_class(div7, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==1);
-    				toggle_class(div8, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==2);
-    				toggle_class(div10, "red", ctx.switchers[0].video.ME[0].transitionPosition != 0);
-    				toggle_class(div12, "yellow", ctx.switchers[0].video.downstreamKeyTie[0]);
-    				toggle_class(div13, "red", ctx.switchers[0].video.downstreamKeyOn[0]);
-    				toggle_class(div15, "yellow", ctx.switchers[0].video.downstreamKeyTie[1]);
-    				toggle_class(div16, "red", ctx.switchers[0].video.downstreamKeyOn[1]);
-    				toggle_class(div19, "red", ctx.switchers[0].video.ME[0].fadeToBlack);
+    				toggle_class(div4, "red", ctx.switchers[0].video.ME[0].upstreamKeyState[0]);
+    				toggle_class(div5, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextBackgroundState);
+    				toggle_class(div6, "yellow", ctx.switchers[0].video.ME[0].upstreamKeyNextState[0]);
+    				toggle_class(div8, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==0);
+    				toggle_class(div9, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==1);
+    				toggle_class(div10, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==2);
+    				toggle_class(div11, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==3);
+    				toggle_class(div11, "disabled", ctx.switchers[0].topology.numberOfStingers==0);
+    				toggle_class(div12, "yellow", ctx.switchers[0].video.ME[0].transitionStyle==4);
+    				toggle_class(div12, "disabled", ctx.switchers[0].topology.numberOfDVEs==0);
+    				toggle_class(div15, "red", ctx.switchers[0].video.ME[0].transitionPosition != 0);
+    				toggle_class(div18, "yellow", ctx.switchers[0].video.downstreamKeyTie[0]);
+    				toggle_class(div19, "red", ctx.switchers[0].video.downstreamKeyOn[0]);
+    				toggle_class(div22, "yellow", ctx.switchers[0].video.downstreamKeyTie[1]);
+    				toggle_class(div23, "red", ctx.switchers[0].video.downstreamKeyOn[1]);
+    				toggle_class(div27, "red", ctx.switchers[0].video.ME[0].fadeToBlack);
     			}
     		},
 
@@ -707,28 +789,14 @@ var app = (function () {
 
     		d: function destroy(detaching) {
     			if (detaching) {
-    				detach(section0);
+    				detach(header);
+    				detach(t1);
+    				detach(div30);
     			}
 
     			destroy_each(each_blocks_1, detaching);
 
-    			if (detaching) {
-    				detach(t2);
-    				detach(section1);
-    			}
-
     			destroy_each(each_blocks, detaching);
-
-    			if (detaching) {
-    				detach(t5);
-    				detach(section2);
-    				detach(t13);
-    				detach(section3);
-    				detach(t26);
-    				detach(section4);
-    				detach(t40);
-    				detach(section5);
-    			}
 
     			run_all(dispose);
     		}
@@ -800,15 +868,15 @@ var app = (function () {
               "input": "0"
             },
             "1": {
-              "name": "Titulky",
-              "label": "TIT",
+              "name": "Cam 1",
+              "label": "CAM1",
               "id": "1",
               "device": 0,
               "input": "1"
             },
             "2": {
-              "name": "Video PC",
-              "label": "VID",
+              "name": "Cam 2",
+              "label": "CAM2",
               "id": "2",
               "device": 0,
               "input": "2"
@@ -863,8 +931,8 @@ var app = (function () {
               "input": "2002"
             },
             "3010": {
-              "name": "Media 1 Logo",
-              "label": "LOGO",
+              "name": "Media Player 1",
+              "label": "MP1",
               "id": "3010",
               "device": 0,
               "input": "3010"
@@ -927,7 +995,7 @@ var app = (function () {
                 "numberOfKeyers": 1,
                 "programInput": 3010,
                 "previewInput": 1,
-                "transitionStyle": 2,
+                "transitionStyle": 0,
                 "upstreamKeyNextBackground": true,
                 "transitionPreview": false,
                 "transitionPosition": 0,
@@ -1150,25 +1218,19 @@ var app = (function () {
     }
 
     function onKeyUp(event) {
-    	console.log('keyup', event.key, event.keyCode);
     	var key = event.key || event.keyCode;
     	if (key === ' ' || key === 32) {
+            event.preventDefault();
             cutTransition();
-        } else if (key === 'Enter' || key === 13) {
+      } else if (key === 'Enter' || key === 13) {
     		autoTransition();
-    	} else if (key >= '1' && key <= '9') {
+    	} else if (key >= '0' && key <= '9') {
     		if (event.getModifierState('Control')) {
-    			changeProgram(0);
+    			changeProgramInput(0, key);
     		} else {
-    			changePreview(0);
+    			changePreviewInput(0, key);
     		}
-    	} else if (key == '0') {
-    		if (event.getModifierState('Control')) {
-    			changeProgram(0);
-    		} else {
-    			changePreview(0);
-    		}
-    	}
+      }
     }
 
     onMount(() => {
@@ -1259,6 +1321,12 @@ var app = (function () {
     	sendMessage({cutTransition: {device: 0}});
     }
 
+    function changeTransitionPreview(device) {
+      device = device || 0;
+    	const status = !switchers[0].video.ME[0].transitionPreview;
+    	sendMessage({changeTransitionPreview: {device, status}});
+    }
+
     function changeTransitionType(type) {
     	sendMessage({changeTransitionType: {type}});
     }
@@ -1323,26 +1391,34 @@ var app = (function () {
     	}
 
     	function click_handler_8(e) {
-    		return toggleDownstreamKeyTie(1);
+    		return changeTransitionType(3);
     	}
 
     	function click_handler_9(e) {
-    		return toggleDownstreamKeyOn(1);
+    		return changeTransitionType(4);
     	}
 
     	function click_handler_10(e) {
-    		return autoDownstreamKey(1);
+    		return toggleDownstreamKeyTie(1);
     	}
 
     	function click_handler_11(e) {
-    		return toggleDownstreamKeyTie(2);
+    		return toggleDownstreamKeyOn(1);
     	}
 
     	function click_handler_12(e) {
-    		return toggleDownstreamKeyOn(2);
+    		return autoDownstreamKey(1);
     	}
 
     	function click_handler_13(e) {
+    		return toggleDownstreamKeyTie(2);
+    	}
+
+    	function click_handler_14(e) {
+    		return toggleDownstreamKeyOn(2);
+    	}
+
+    	function click_handler_15(e) {
     		return autoDownstreamKey(2);
     	}
 
@@ -1354,6 +1430,7 @@ var app = (function () {
     		changePreview,
     		autoTransition,
     		cutTransition,
+    		changeTransitionPreview,
     		changeTransitionType,
     		toggleUpstreamKeyNextBackground,
     		toggleUpstreamKeyNextState,
@@ -1375,7 +1452,9 @@ var app = (function () {
     		click_handler_10,
     		click_handler_11,
     		click_handler_12,
-    		click_handler_13
+    		click_handler_13,
+    		click_handler_14,
+    		click_handler_15
     	};
     }
 

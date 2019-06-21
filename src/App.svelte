@@ -23,15 +23,15 @@ let switchers = [
           "input": "0"
         },
         "1": {
-          "name": "Titles",
-          "label": "TIT",
+          "name": "Cam 1",
+          "label": "CAM1",
           "id": "1",
           "device": 0,
           "input": "1"
         },
         "2": {
-          "name": "Video PC",
-          "label": "VID",
+          "name": "Cam 2",
+          "label": "CAM2",
           "id": "2",
           "device": 0,
           "input": "2"
@@ -86,8 +86,8 @@ let switchers = [
           "input": "2002"
         },
         "3010": {
-          "name": "Media 1 Logo",
-          "label": "LOGO",
+          "name": "Media Player 1",
+          "label": "MP1",
           "id": "3010",
           "device": 0,
           "input": "3010"
@@ -150,7 +150,7 @@ let switchers = [
             "numberOfKeyers": 1,
             "programInput": 3010,
             "previewInput": 1,
-            "transitionStyle": 2,
+            "transitionStyle": 0,
             "upstreamKeyNextBackground": true,
             "transitionPreview": false,
             "transitionPosition": 0,
@@ -375,8 +375,9 @@ function doConnect() {
 function onKeyUp(event) {
 	var key = event.key || event.keyCode;
 	if (key === ' ' || key === 32) {
+        event.preventDefault();
         cutTransition();
-    } else if (key === 'Enter' || key === 13) {
+  } else if (key === 'Enter' || key === 13) {
 		autoTransition();
 	} else if (key >= '0' && key <= '9') {
 		if (event.getModifierState('Control')) {
@@ -384,6 +385,7 @@ function onKeyUp(event) {
 		} else {
 			changePreviewInput(0, key);
 		}
+  }
 }
 
 onMount(() => {
@@ -536,6 +538,12 @@ function cutTransition(device) {
 	sendMessage({cutTransition: {device: 0}});
 }
 
+function changeTransitionPreview(device) {
+  device = device || 0;
+	const status = !switchers[0].video.ME[0].transitionPreview;
+	sendMessage({changeTransitionPreview: {device, status}});
+}
+
 function changeTransitionPosition(percent, device = getTransitionDevice()) {
 	sendMessage({changeTransitionPosition: {device, position: parseInt(percent*10000)}});
 }
@@ -577,61 +585,99 @@ function fadeToBlack() {
 }
 </script>
 
-<section class="channels">
-	<h2 class="section">Program</h2>
-	<div class="well">
-	{#each switchers[0].visibleChannels as channel}
-		<div class="button" class:red={isProgramChannel(channel)} on:click={e=>changeProgram(channel)}>{channel.label}</div>
-	{/each}
-	</div>
-</section>
+<header class="row">
+  <h1>{switchers[0]._pin}</h1>
+</header>
 
-<section class="channels">
-	<h2 class="section">Preview</h2>
-	<div class="well">
-	{#each switchers[0].visibleChannels as channel}
-		<div class="button" class:green={isPreviewChannel(channel)} on:click={e=>changePreview(channel)}>{channel.label}</div>
-	{/each}
-	</div>
-</section>
+<div class="row">
 
-<section class="next-transition">
-	<h2 class="section">Next Transition</h2>
-	<div class="well">
-		<div class="button" class:red={switchers[0].video.ME[0].upstreamKeyState[0]} on:click={e=>toggleUpstreamKeyState(0)}>ON AIR</div>
-		<div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextBackgroundState} on:click={e=>toggleUpstreamKeyNextBackground()}>BKGD</div>
-		<div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextState[0]} on:click={e=>toggleUpstreamKeyNextState(0)}>Key 1</div>
-	</div>
-</section>
+<div class="col-lg-7">
+  <section class="channels">
+    <h2 class="section">Program</h2>
+    <div class="well">
+    {#each switchers[0].visibleChannels as channel}
+      <div class="button" class:red={isProgramChannel(channel)} on:click={e=>changeProgram(channel)}>{channel.label}</div>
+    {/each}
+    </div>
+  </section>
 
-<section class="transition">
-	<h2 class="section">Transition style</h2>
-	<div class="well">
-		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==0} on:click={e=>changeTransitionType(0)}>MIX</div>
-		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==1} on:click={e=>changeTransitionType(1)}>DIP</div>
-		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==2} on:click={e=>changeTransitionType(2)}>WIPE</div>
-		<br>
-		<div class="button" on:click={cutTransition}>CUT</div>
-		<div class="button" class:red={switchers[0].video.ME[0].transitionPosition != 0} on:click={autoTransition}>AUTO</div>
-	</div>
-</section>
+  <section class="channels">
+    <h2 class="section">Preview</h2>
+    <div class="well">
+    {#each switchers[0].visibleChannels as channel}
+      <div class="button" class:green={isPreviewChannel(channel)} on:click={e=>changePreview(channel)}>{channel.label}</div>
+    {/each}
+    </div>
+  </section>
+</div>
 
-<section class="dsk">
-	<h2 class="section">Downstream Key</h2>
-	<div class="well">
-		<div class="button" class:yellow={switchers[0].video.downstreamKeyTie[0]} on:click={e=>toggleDownstreamKeyTie(1)}>TIE</div>
-		<div class="button" class:red={switchers[0].video.downstreamKeyOn[0]} on:click={e=>toggleDownstreamKeyOn(1)}>ON AIR</div>
-		<div class="button" class:red={false} on:click={e=>autoDownstreamKey(1)}>AUTO</div>
+<div class="col-lg-3">
+  <section class="next-transition">
+    <h2 class="section">Next Transition</h2>
+    <div class="well">
+      <div class="button-spacer"></div>
+      <div class="button" class:red={switchers[0].video.ME[0].upstreamKeyState[0]} on:click={e=>toggleUpstreamKeyState(0)}>ON AIR</div>
+      <br>
+      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextBackgroundState} on:click={e=>toggleUpstreamKeyNextBackground()}>BKGD</div>
+      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextState[0]} on:click={e=>toggleUpstreamKeyNextState(0)}>Key 1</div>
+    </div>
+  </section>
 
-		<div class="button" class:yellow={switchers[0].video.downstreamKeyTie[1]} on:click={e=>toggleDownstreamKeyTie(2)}>TIE</div>
-		<div class="button" class:red={switchers[0].video.downstreamKeyOn[1]} on:click={e=>toggleDownstreamKeyOn(2)}>ON AIR</div>
-		<div class="button" class:red={false} on:click={e=>autoDownstreamKey(2)}>AUTO</div>
-	</div>
-</section>
+  <section class="transition">
+    <h2 class="section">Transition style</h2>
+    <div class="well">
+      <div class="button"
+          class:yellow={switchers[0].video.ME[0].transitionStyle==0}
+          on:click={e=>changeTransitionType(0)}>MIX</div>
+      <div class="button"
+        class:yellow={switchers[0].video.ME[0].transitionStyle==1}
+        on:click={e=>changeTransitionType(1)}>DIP</div>
+      <div class="button"
+           class:yellow={switchers[0].video.ME[0].transitionStyle==2}
+           on:click={e=>changeTransitionType(2)}>WIPE</div>
+      <div class="button"
+           class:yellow={switchers[0].video.ME[0].transitionStyle==3}
+           class:disabled={switchers[0].topology.numberOfStingers==0}
+           on:click={e=>changeTransitionType(3)}>STING</div>
+      <div class="button"
+           class:yellow={switchers[0].video.ME[0].transitionStyle==4}
+           class:disabled={switchers[0].topology.numberOfDVEs==0}
+           on:click={e=>changeTransitionType(4)}>DVE</div>
+      <br>
+      <div class="button"
+           on:click={changeTransitionPreview}>PREV</div>
+      <div class="button"
+           on:click={cutTransition}>CUT</div>
+      <div class="button"
+           class:red={switchers[0].video.ME[0].transitionPosition != 0}
+           on:click={autoTransition}>AUTO</div>
+    </div>
+  </section>
+</div>
 
-<section class="ftb">
-	<h2 class="section">Fade to Black</h2>
-	<div class="well">
-		<div class="button" class:red={switchers[0].video.ME[0].fadeToBlack} on:click={fadeToBlack}>FTB</div>
-	</div>
-</section>
+<div class="col-lg-2">
+  <section class="downstream-key">
+    <h2 class="section">Downstream Key</h2>
+    <div class="well">
+      <div class="button-column">
+        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[0]} on:click={e=>toggleDownstreamKeyTie(1)}>TIE</div>
+        <div class="button" class:red={switchers[0].video.downstreamKeyOn[0]} on:click={e=>toggleDownstreamKeyOn(1)}>ON AIR</div>
+        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(1)}>AUTO</div>
+      </div>
+      <div class="button-column">
+        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[1]} on:click={e=>toggleDownstreamKeyTie(2)}>TIE</div>
+        <div class="button" class:red={switchers[0].video.downstreamKeyOn[1]} on:click={e=>toggleDownstreamKeyOn(2)}>ON AIR</div>
+        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(2)}>AUTO</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="fade-to-black">
+    <h2 class="section">Fade to Black</h2>
+    <div class="well">
+      <div class="button" class:red={switchers[0].video.ME[0].fadeToBlack} on:click={fadeToBlack}>FTB</div>
+    </div>
+  </section>
+</div>
+
+</div><!-- row -->
