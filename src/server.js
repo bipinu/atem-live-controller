@@ -9,24 +9,23 @@ var expressWs = require('express-ws')(app);
 let atem;
 const switchers = [];
 
-let STATE = {
-  channels: config.channels,
-  devices: switchers,
-}
+let CLIENTS = expressWs.getWss().clients;
 
-let CLIENTS = [];
-
+let device = 0;
 for (var switcher of config.switchers) {
   atem = new ATEM;
   atem.event.setMaxListeners(5);
   atem.connect(switcher.addr, switcher.port);
+  atem.state.device = device;
   switchers.push(atem);
 
   atem.on('stateChanged', (err, state) => {
-    for (client of CLIENTS) {
-      client.send(JSON.stringify({state}));
+    for (var client of CLIENTS) {
+      client.send(JSON.stringify({ switchers: [state] }));
     }
   })
+
+  device += 1;
 }
 
 // app.use(bodyParser.json());
@@ -35,7 +34,6 @@ app.use('/', express.static(__dirname + '/../public'));
 app.ws('/ws', function(ws, req) {
   const ip = req.connection.remoteAddress;
   console.log(ip, 'connected');
-  // CLIENTS = ws.getWss().clients;
   ws.send(JSON.stringify({channels: config.channels}));
 
   ws.on('message', function incoming(message) {
@@ -98,14 +96,16 @@ app.ws('/ws', function(ws, req) {
   });
 });
 
-// TODO: periodicaly update clients
-app.get('/api/switchersState', (req, res) => {
-    const result = [];
-    for (atem of switchers) {
-        result.push(atem.state);
-    }
-    res.send(JSON.stringify(result));
+function broadcastSwitcherStates() {
+  const states = [];
+  for (atem of switchers) {
+    states.push(atem.state);
   }
-);
+  for (let client of CLIENTS) {
+    client.send(JSON.stringify({ switchers: states}));
+  }
+}
+// atem.on('stateChanged') fires enough
+// setInterval(broadcastSwitcherStates, 5000);
 
 app.listen(8080);

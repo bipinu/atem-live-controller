@@ -1,62 +1,321 @@
 <script>
 import { onMount } from 'svelte';
-import Button from './Button.svelte';
 
-let state = [{
-    topology: {
-      numberOfMEs: null,
-      numberOfSources: null,
-      numberOfColorGenerators: null,
-      numberOfAUXs: null,
-      numberOfDownstreamKeys: null,
-      numberOfStingers: null,
-      numberOfDVEs: null,
-      numberOfSuperSources: null
-    },
-    tallys: [],
-    channels: {
-		1: {
-			name: 'Kamera 1',
-			label: 'Cam1',
-		},
-		2: {
-			name: 'meno 2',
-			label: 'Cam2',
-		},
-		3: {
-			name: 'meno 4',
-			label: 'Cam3',
-		},
-		4: {
-			name: 'meno 4',
-			label: 'Cam4',
-		},
-		5: {
-			name: 'meno 5',
-			label: 'Cam5',
-		},
-		6: {
-			name: 'meno 6',
-			label: 'Cam6',
-		},
-	},
-    channelsArray: [],
-    video: {
-      ME: [{
-		  programInput: 1,
-		  previewInput: 2,
-	  }],
-      downstreamKeyOn: [],
-      downstreamKeyTie: [],
-      auxs: {}
-    },
-    audio: {
-      hasMonitor: null,
-      numberOfChannels: null,
-      channels: {}
+let switchers = [
+    {
+      "topology": {
+        "numberOfMEs": 1,
+        "numberOfSources": 18,
+        "numberOfColorGenerators": 2,
+        "numberOfAUXs": 0,
+        "numberOfDownstreamKeys": 0,
+        "numberOfStingers": 2,
+        "numberOfDVEs": 0,
+        "numberOfSuperSources": 4
+      },
+      "tallys": [2, 0, 0, 0, 0, 0],
+      "channels": {
+        "0": {
+          "name": "Black",
+          "label": "Blk",
+          "id": "0",
+          "device": 0,
+          "input": "0"
+        },
+        "1": {
+          "name": "Titles",
+          "label": "TIT",
+          "id": "1",
+          "device": 0,
+          "input": "1"
+        },
+        "2": {
+          "name": "Video PC",
+          "label": "VID",
+          "id": "2",
+          "device": 0,
+          "input": "2"
+        },
+        "3": {
+          "name": "Cam 3",
+          "label": "CAM3",
+          "id": "3",
+          "device": 0,
+          "input": "3"
+        },
+        "4": {
+          "name": "Cam 4",
+          "label": "CAM4",
+          "id": "4",
+          "device": 0,
+          "input": "4"
+        },
+        "5": {
+          "name": "Cam 5",
+          "label": "CAM5",
+          "id": "5",
+          "device": 0,
+          "input": "5"
+        },
+        "6": {
+          "name": "Cam 6",
+          "label": "CAM6",
+          "id": "6",
+          "device": 0,
+          "input": "6"
+        },
+        "1000": {
+          "name": "Color Bars",
+          "label": "Bars",
+          "id": "1000",
+          "device": 0,
+          "input": "1000"
+        },
+        "2001": {
+          "name": "Color 1",
+          "label": "Col1",
+          "id": "2001",
+          "device": 0,
+          "input": "2001"
+        },
+        "2002": {
+          "name": "Color 2",
+          "label": "Col2",
+          "id": "2002",
+          "device": 0,
+          "input": "2002"
+        },
+        "3010": {
+          "name": "Media 1 Logo",
+          "label": "LOGO",
+          "id": "3010",
+          "device": 0,
+          "input": "3010"
+        },
+        "3011": {
+          "name": "Media 1 Key",
+          "label": "MP1K",
+          "id": "3011",
+          "device": 0,
+          "input": "3011"
+        },
+        "3020": {
+          "name": "Media Player 2",
+          "label": "MP2",
+          "id": "3020",
+          "device": 0,
+          "input": "3020"
+        },
+        "3021": {
+          "name": "Media Player 2 Key",
+          "label": "MP2K",
+          "id": "3021",
+          "device": 0,
+          "input": "3021"
+        },
+        "7001": {
+          "name": "Clean Feed 1",
+          "label": "Cfd1",
+          "id": "7001",
+          "device": 0,
+          "input": "7001"
+        },
+        "7002": {
+          "name": "Clean Feed 2",
+          "label": "Cfd2",
+          "id": "7002",
+          "device": 0,
+          "input": "7002"
+        },
+        "10010": {
+          "name": "Program",
+          "label": "Pgm",
+          "id": "10010",
+          "device": 0,
+          "input": "10010"
+        },
+        "10011": {
+          "name": "Preview",
+          "label": "Pvw",
+          "id": "10011",
+          "device": 0,
+          "input": "10011"
+        }
+      },
+      "video": {
+        "ME": [
+          {
+            "upstreamKeyState": [false],
+            "upstreamKeyNextState": [false],
+            "numberOfKeyers": 1,
+            "programInput": 3010,
+            "previewInput": 1,
+            "transitionStyle": 2,
+            "upstreamKeyNextBackground": true,
+            "transitionPreview": false,
+            "transitionPosition": 0,
+            "transitionFrameCount": 25,
+            "fadeToBlack": false
+          }
+        ],
+        "downstreamKeyOn": [false, false],
+        "downstreamKeyTie": [false, false],
+        "auxs": {}
+      },
+      "audio": {
+        "hasMonitor": false,
+        "numberOfChannels": 0,
+        "channels": {
+          "1": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "2": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "3": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "4": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "5": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "6": {
+            "on": false,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          },
+          "1101": {
+            "on": true,
+            "afv": false,
+            "gain": 0.5011853596610636,
+            "rawGain": 32768,
+            "rawPan": 0
+          }
+        },
+        "master": {
+          "afv": false,
+          "gain": 0.5011853596610636,
+          "rawGain": 32768
+        }
+      },
+      "device": 0,
+      "_ver0": 2,
+      "_ver1": 27,
+      "_pin": "ATEM Television Studio",
+      "model": 1,
+      "visibleChannels": [
+        {
+          "name": "Titulky",
+          "label": "TIT",
+          "id": "1",
+          "device": 0,
+          "input": "1"
+        },
+        {
+          "name": "Video PC",
+          "label": "VID",
+          "id": "2",
+          "device": 0,
+          "input": "2"
+        },
+        {
+          "name": "Cam 3",
+          "label": "CAM3",
+          "id": "3",
+          "device": 0,
+          "input": "3"
+        },
+        {
+          "name": "Cam 4",
+          "label": "CAM4",
+          "id": "4",
+          "device": 0,
+          "input": "4"
+        },
+        {
+          "name": "Cam 5",
+          "label": "CAM5",
+          "id": "5",
+          "device": 0,
+          "input": "5"
+        },
+        {
+          "name": "Cam 6",
+          "label": "CAM6",
+          "id": "6",
+          "device": 0,
+          "input": "6"
+        },
+        {
+          "name": "Black",
+          "label": "Blk",
+          "id": "0",
+          "device": 0,
+          "input": "0"
+        },
+        {
+          "name": "Color 1",
+          "label": "Col1",
+          "id": "2001",
+          "device": 0,
+          "input": "2001"
+        },
+        {
+          "name": "Color 2",
+          "label": "Col2",
+          "id": "2002",
+          "device": 0,
+          "input": "2002"
+        },
+        {
+          "name": "Color Bars",
+          "label": "Bars",
+          "id": "1000",
+          "device": 0,
+          "input": "1000"
+        },
+        {
+          "name": "Media 1 Logo",
+          "label": "LOGO",
+          "id": "3010",
+          "device": 0,
+          "input": "3010"
+        },
+        {
+          "name": "Media Player 2",
+          "label": "MP2",
+          "id": "3020",
+          "device": 0,
+          "input": "3020"
+        }
+      ]
     }
-  }
-];
+  ];
+
 let channels = [
     { "device": 0, "input": 1 },
     { "device": 0, "input": 2 },
@@ -72,49 +331,118 @@ let channels = [
     { "device": 0, "input": 3020 }
   ];
 
-$: 	updateChannelsArray();
-
-function updateChannelsArray() {
-	state[0].channelsArray = [];
-	for (var id in state[0].channels) {
-		const channel = state[0].channels[id];
-		channel.id = id;
-		state[0].channelsArray.push(channel);
-	}
-}
-
 let ws;
+let intervalID = 0;
+let socketIsOpen = false;
 
-onMount(() => {
+function doConnect() {
 	ws = new WebSocket("ws://localhost:8080/ws");
 	ws.addEventListener('open', function(event) {
 		console.log('websocket opened');
-	})
-	ws.addEventListener('message', function(message) {
-		console.log(message.data);
-		let data = JSON.parse(message.data);
-		if (data.state) {
-			state = data.state;
+		socketIsOpen = true;
+		clearInterval(intervalID);
+		intervalID = 0;
+	});
+	ws.addEventListener('message', function(event) {
+		let data = JSON.parse(event.data);
+		console.log(data);
+		if (data.switchers) {
+			for (var atem of data.switchers) {
+				updateVisibleChannels(atem);
+			}
+			switchers = data.switchers;
 		}
 		if (data.channels) {
 			channels = data.channels;
 		}
-	})
-	ws.addEventListener('error', function(err) {
-		console.log('error:', err);
-	})
+		return data;
+	});
+	ws.addEventListener('error', function(evt) {
+		socketIsOpen = false;
+		if (!intervalID) {
+			intervalID = setTimeout(doConnect, 5000);
+		}
+	});
+	ws.addEventListener('close', function(event) {
+		console.log('websocket closed');
+		socketIsOpen = false;
+		if (!intervalID) {
+			intervalID = setTimeout(doConnect, 5000);
+		}
+	});
+}
+
+function onKeyUp(event) {
+	var key = event.key || event.keyCode;
+	if (key === ' ' || key === 32) {
+        cutTransition();
+    } else if (key === 'Enter' || key === 13) {
+		autoTransition();
+	} else if (key >= '0' && key <= '9') {
+		if (event.getModifierState('Control')) {
+			changeProgramInput(0, key);
+		} else {
+			changePreviewInput(0, key);
+		}
+}
+
+onMount(() => {
+	doConnect();
+	document.addEventListener('keyup', onKeyUp);
 });
 
 function sendMessage(data) {
-	ws.send(JSON.stringify(data));
+	if (socketIsOpen) {
+		ws.send(JSON.stringify(data));
+	} else {
+		console.log('sendMessage failed: Websocket not connected');
+	}
+}
+
+function updateVisibleChannels(atem) {
+	atem.visibleChannels = [];
+	for (var id in atem.channels) {
+		const channel = atem.channels[id];
+		channel.id = id;
+		channel.device = atem.device;
+		channel.input = id;
+	}
+	// standard inputs
+	for (var id=1; id<10; id++) {
+		if (atem.channels[id]) {
+			atem.visibleChannels.push(atem.channels[id]);
+		} else {
+			break;
+		}
+	}
+	// Black
+	if (atem.channels[0]) {
+		atem.visibleChannels.push(atem.channels[0]);
+	}
+	// Colors
+	for (var id=2001; id<3000; id++) {
+		if (atem.channels[id]) {
+			atem.visibleChannels.push(atem.channels[id]);
+		} else {
+			break;
+		}
+	}
+	// Color Bars
+	if (atem.channels[1000]) {
+		atem.visibleChannels.push(atem.channels[1000]);
+	}
+	// Media Players
+	for (var id=3010; id<4000; id+=10) {
+		if (atem.channels[id]) {
+			atem.visibleChannels.push(atem.channels[id]);
+		} else {
+			break;
+		}
+	}
 }
 
 function findChannel(device, input) {
-	for (let channel of channels) {
-		if ((channel.device === device) && (channel.input === input)) {
-			return channel;
-		}
-	}
+	return switchers[device].channels[input];
 }
 
 function findChainChannel(device, targetDevice) {
@@ -124,33 +452,33 @@ function findChainChannel(device, targetDevice) {
 }
 
 function getParentProgramChannel() {
-	return findChannel(0, state[0].video.ME[0].programInput);
+	return findChannel(0, switchers[0].video.ME[0].programInput);
 }
 
 function getVirtualProgramChannel() {
-	const parentProgramChannel = findChannel(0, state[0].video.ME[0].programInput);
+	const parentProgramChannel = findChannel(0, switchers[0].video.ME[0].programInput);
 	if (parentProgramChannel.chainDevice != null) {
-		return findChannel(parentProgramChannel.chainDevice, state[parentProgramChannel.chainDevice].video.ME[0].programInput);
+		return findChannel(parentProgramChannel.chainDevice, switchers[parentProgramChannel.chainDevice].video.ME[0].programInput);
 	} else {
-		return findChannel(0, state[0].video.ME[0].programInput);
+		return findChannel(0, switchers[0].video.ME[0].programInput);
 	}
 };
 
 function getVirtualPreviewChannel() {
-	const parentProgramChannel = findChannel(0, state[0].video.ME[0].programInput);
-	const parentPreviewChannel = findChannel(0, state[0].video.ME[0].previewInput);
+	const parentProgramChannel = findChannel(0, switchers[0].video.ME[0].programInput);
+	const parentPreviewChannel = findChannel(0, switchers[0].video.ME[0].previewInput);
 	if ((parentPreviewChannel.chainDevice != null) && (parentProgramChannel.chainDevice === parentPreviewChannel.chainDevice)) {
-		return findChannel(parentPreviewChannel.chainDevice, state[parentPreviewChannel.chainDevice].video.ME[0].previewInput);
+		return findChannel(parentPreviewChannel.chainDevice, switchers[parentPreviewChannel.chainDevice].video.ME[0].previewInput);
 	} else if (parentPreviewChannel.chainDevice != null) {
-		return findChannel(parentPreviewChannel.chainDevice, state[parentPreviewChannel.chainDevice].video.ME[0].programInput);
+		return findChannel(parentPreviewChannel.chainDevice, switchers[parentPreviewChannel.chainDevice].video.ME[0].programInput);
 	} else {
-		return findChannel(0, state[0].video.ME[0].previewInput);
+		return findChannel(0, switchers[0].video.ME[0].previewInput);
 	}
 };
 
 function getTransitionDevice() {
-	const parentProgramChannel = findChannel(0, state[0].video.ME[0].programInput);
-	const parentPreviewChannel = findChannel(0, state[0].video.ME[0].previewInput);
+	const parentProgramChannel = findChannel(0, switchers[0].video.ME[0].programInput);
+	const parentPreviewChannel = findChannel(0, switchers[0].video.ME[0].previewInput);
 	console.log(parentProgramChannel, parentPreviewChannel);
 	if ((parentPreviewChannel.chainDevice != null) && (parentProgramChannel.chainDevice === parentPreviewChannel.chainDevice)) {
 		return parentPreviewChannel.chainDevice;
@@ -170,20 +498,19 @@ function isPreviewChannel(channel) {
 };
 
 function getChannelInput(channel) {
-	return state[channel.device].channels[channel.input];
-}
-
-function changePreviewInput(device, input) {
-	sendMessage({changePreivewInput: {device, input}})
+	return switchers[channel.device].channels[channel.input];
 }
 
 function changeProgramInput(device, input) {
 	sendMessage({changeProgramInput: {device, input}})
 }
 
+function changePreviewInput(device, input) {
+	sendMessage({changePreviewInput: {device, input}})
+}
+
 function changeProgram(channel) {
-	changePreview(channel);
-	cutTransition();
+	changeProgramInput(channel.device, channel.input);
 }
 
 function changePreview(channel) {
@@ -201,12 +528,12 @@ function changePreview(channel) {
 	}
 };
 
-function autoTransition(device = getTransitionDevice()) {
-	sendMessage({autoTransition: {device}});
+function autoTransition(device) {
+	sendMessage({autoTransition: {device: 0}});
 }
 
-function cutTransition(device = getTransitionDevice()) {
-	sendMessage({cutTransition: {device}});
+function cutTransition(device) {
+	sendMessage({cutTransition: {device: 0}});
 }
 
 function changeTransitionPosition(percent, device = getTransitionDevice()) {
@@ -218,32 +545,32 @@ function changeTransitionType(type) {
 }
 
 function toggleUpstreamKeyNextBackground() {
-	const state = !state[0].video.ME[0].upstreamKeyNextBackground;
-	sendMessage({changeUpstreamKeyNextBackground: {device: 0, state}});
+	const status = !switchers[0].video.ME[0].upstreamKeyNextBackground;
+	sendMessage({changeUpstreamKeyNextBackground: {device: 0, status}});
 };
 
 function toggleUpstreamKeyNextState(number) {
-	const state = !state[0].video.ME[0].upstreamKeyNextState[number];
-	sendMessage({changeUpstreamKeyNextBackground: {device: 0, number, state}});
+	const status = !switchers[0].video.ME[0].upstreamKeyNextState[number];
+	sendMessage({changeUpstreamKeyNextBackground: {device: 0, number, status}});
 };
 
 function toggleUpstreamKeyState(number) {
-	const state = !state[0].video.ME[0].upstreamKeyState[number];
-	sendMessage({changeUpstreamKeyState: {device: 0, number, state}});
+	const status = !switchers[0].video.ME[0].upstreamKeyState[number];
+	sendMessage({changeUpstreamKeyState: {device: 0, number, status}});
 };
 
 function toggleDownstreamKeyTie(number) {
-	const state = !state[0].video.downstreamKeyTie[number];
-	sendMessage({changeDownstreamKeyTie: {device: 0, number, state}});
+	const status = !switchers[0].video.downstreamKeyTie[number];
+	sendMessage({changeDownstreamKeyTie: {device: 0, number, status}});
 };
 
 function toggleDownstreamKeyOn(number) {
-	const state = !state[0].video.downstreamKeyOn[number];
-	sendMessage({changeDownstreamKeyOn: {device: 0, number, state}});
+	const status = !switchers[0].video.downstreamKeyOn[number];
+	sendMessage({changeDownstreamKeyOn: {device: 0, number, status}});
 };
 
 function autoDownstreamKey(number) {
-	sendMessage({autoDownstreamKey: {device: 0, number, state}});
+	sendMessage({autoDownstreamKey: {device: 0, number}});
 }
 function fadeToBlack() {
 	sendMessage({fadeToBlack: {device: 0}});
@@ -252,51 +579,59 @@ function fadeToBlack() {
 
 <section class="channels">
 	<h2 class="section">Program</h2>
-	{#each state[0].channelsArray as channel}
-	<div class="button" class:red={isProgramChannel(channel.id)} on:click={e=>changeProgram(channel.id)}>{channel.label}</div>
+	<div class="well">
+	{#each switchers[0].visibleChannels as channel}
+		<div class="button" class:red={isProgramChannel(channel)} on:click={e=>changeProgram(channel)}>{channel.label}</div>
 	{/each}
+	</div>
 </section>
 
 <section class="channels">
 	<h2 class="section">Preview</h2>
-	{#each state[0].channelsArray as channel}
-	<div class="button" class:green={isPreviewChannel(channel.id)} on:click={e=>changePreview(channel.id)}>{channel.label}</div>
+	<div class="well">
+	{#each switchers[0].visibleChannels as channel}
+		<div class="button" class:green={isPreviewChannel(channel)} on:click={e=>changePreview(channel)}>{channel.label}</div>
 	{/each}
+	</div>
 </section>
 
 <section class="next-transition">
 	<h2 class="section">Next Transition</h2>
-	<Button color="red" glow={true} on:click={e=>toggleUpstreamKeyState(0)}>ON AIR</Button>
-	<Button color="yellow" glow={true} on:click={toggleUpstreamKeyNextBackground}>BKGD</Button>
-	<Button color="yellow" glow={true} on:click={e=>toggleUpstreamKeyNextState(0)}>Key 1</Button>
+	<div class="well">
+		<div class="button" class:red={switchers[0].video.ME[0].upstreamKeyState[0]} on:click={e=>toggleUpstreamKeyState(0)}>ON AIR</div>
+		<div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextBackgroundState} on:click={e=>toggleUpstreamKeyNextBackground()}>BKGD</div>
+		<div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextState[0]} on:click={e=>toggleUpstreamKeyNextState(0)}>Key 1</div>
+	</div>
 </section>
 
 <section class="transition">
 	<h2 class="section">Transition style</h2>
-	<Button color="red" glow={false} on:click={e=>changeTransitionType(0)}>MIX</Button>
-	<Button color="red" glow={false} on:click={e=>changeTransitionType(1)}>DIP</Button>
-	<Button color="red" glow={false} on:click={e=>changeTransitionType(2)}>WIPE</Button>
-	<!-- <Button color="red" glow={false} on:click={e=>changeTransitionType(3)}>STING</Button> -->
-	<!-- <Button color="red" glow={false} on:click={e=>changeTransitionType(4)}>DVE</Button> -->
-	<!-- <Button color="red" glow={false} on:click={changeTransitionPreview}>PREV</Button> -->
-	<br>
-	<Button color="red" glow={false} on:click={cutTransition}>CUT</Button>
-	<Button color="red" glow={true} on:click={autoTransition}>AUTO</Button>
+	<div class="well">
+		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==0} on:click={e=>changeTransitionType(0)}>MIX</div>
+		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==1} on:click={e=>changeTransitionType(1)}>DIP</div>
+		<div class="button" class:yellow={switchers[0].video.ME[0].transitionStyle==2} on:click={e=>changeTransitionType(2)}>WIPE</div>
+		<br>
+		<div class="button" on:click={cutTransition}>CUT</div>
+		<div class="button" class:red={switchers[0].video.ME[0].transitionPosition != 0} on:click={autoTransition}>AUTO</div>
+	</div>
 </section>
 
 <section class="dsk">
 	<h2 class="section">Downstream Key</h2>
+	<div class="well">
+		<div class="button" class:yellow={switchers[0].video.downstreamKeyTie[0]} on:click={e=>toggleDownstreamKeyTie(1)}>TIE</div>
+		<div class="button" class:red={switchers[0].video.downstreamKeyOn[0]} on:click={e=>toggleDownstreamKeyOn(1)}>ON AIR</div>
+		<div class="button" class:red={false} on:click={e=>autoDownstreamKey(1)}>AUTO</div>
 
-	<Button color="yellow" glow={true} on:click={e=>toggleDownstreamKeyTie(1)}>TIE</Button>
-	<Button color="red" glow={true} on:click={e=>toggleDownstreamKeyOn(1)}>ON AIR</Button>
-	<Button color="red" glow={false} on:click={e=>autoDownstreamKey(1)}>AUTO</Button>
-
-	<Button color="yellow" glow={false} on:click={e=>toggleDownstreamKeyTie(2)}>TIE</Button>
-	<Button color="red" glow={false} on:click={e=>toggleDownstreamKeyOn(2)}>ON AIR</Button>
-	<Button color="red" glow={false} on:click={e=>autoDownstreamKey(2)}>AUTO</Button>
+		<div class="button" class:yellow={switchers[0].video.downstreamKeyTie[1]} on:click={e=>toggleDownstreamKeyTie(2)}>TIE</div>
+		<div class="button" class:red={switchers[0].video.downstreamKeyOn[1]} on:click={e=>toggleDownstreamKeyOn(2)}>ON AIR</div>
+		<div class="button" class:red={false} on:click={e=>autoDownstreamKey(2)}>AUTO</div>
+	</div>
 </section>
 
 <section class="ftb">
 	<h2 class="section">Fade to Black</h2>
-	<Button color="red" glow={false} on:click={fadeToBlack}>FTB</Button>
+	<div class="well">
+		<div class="button" class:red={switchers[0].video.ME[0].fadeToBlack} on:click={fadeToBlack}>FTB</div>
+	</div>
 </section>

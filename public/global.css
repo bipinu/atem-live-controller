@@ -25,18 +25,21 @@ body {
   text-shadow: 0 0 5px #fff; }
 
 section {
+  margin: 15px;
+}
+
+section h2 {
+	color: #999;
+	font-size: 1rem;
+}
+
+.well {
 	background: #222;
 	border-radius: 7px;
 	box-shadow: 0px 0px 3px black inset;
 	padding: 10px;
-	margin: 15px;
 	position: relative;
 	z-index: 0;
-}
-
-h2.section {
-	color: #999;
-	font-size: 1rem;
 }
 /*
  * Button
@@ -82,23 +85,22 @@ h2.section {
   box-shadow: 0 0 5px 2px rgba(255, 255, 255, 0.8);
   z-index: -1; }
 
-/* .glow is when button is glowing */
-.button.glow.red {
+.button.red {
   box-shadow: 0 0 0 2px black, 0 1px 1px 0 rgba(255, 255, 255, 0.3) inset, 0 0 0 50px rgba(255, 255, 255, 0.1) inset, 0 0 30px 0 red, 0 0 30px 5px red inset; }
 
-.button.glow.red:before {
+.button.red:before {
   background-color: rgba(255, 150, 150, 0.7); }
 
-.button.glow.green {
+.button.green {
   box-shadow: 0 0 0 2px black, 0 1px 1px 0 rgba(255, 255, 255, 0.3) inset, 0 0 0 50px rgba(255, 255, 255, 0.1) inset, 0 0 30px 0 green, 0 0 30px 5px green inset; }
 
-.button.glow.green:before {
+.button.green:before {
   background-color: rgba(150, 255, 150, 0.7); }
 
-.button.glow.yellow {
+.button.yellow {
   box-shadow: 0 0 0 2px black, 0 1px 1px 0 rgba(255, 255, 255, 0.3) inset, 0 0 0 50px rgba(255, 255, 255, 0.1) inset, 0 0 30px 0 rgba(255, 233, 0, 0.8), 0 0 10px 5px #ffc200 inset, 0 0 50px 13px rgba(255, 165, 0, 0.7) inset; }
 
-.button.glow.yellow:before {
+.button.yellow:before {
   background-color: rgba(255, 255, 150, 0.7); }
 
  /* :active is when button is pushed */
