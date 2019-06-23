@@ -545,7 +545,8 @@ function changeTransitionPreview(device) {
 }
 
 function changeTransitionPosition(percent, device = getTransitionDevice()) {
-	sendMessage({changeTransitionPosition: {device, position: parseInt(percent*10000)}});
+  console.assert(percent);
+	sendMessage({changeTransitionPosition: {device, position: parseInt(percent)*10000}});
 }
 
 function changeTransitionType(type) {
@@ -593,19 +594,13 @@ function fadeToBlack() {
 
 <div class="col-lg-7">
   <section class="channels">
-    <h2 class="section">Program</h2>
+    <h2 class="section">Program & Preview</h2>
     <div class="well">
     {#each switchers[0].visibleChannels as channel}
-      <div class="button" class:red={isProgramChannel(channel)} on:click={e=>changeProgram(channel)}>{channel.label}</div>
-    {/each}
-    </div>
-  </section>
-
-  <section class="channels">
-    <h2 class="section">Preview</h2>
-    <div class="well">
-    {#each switchers[0].visibleChannels as channel}
-      <div class="button" class:green={isPreviewChannel(channel)} on:click={e=>changePreview(channel)}>{channel.label}</div>
+      <div class="button"
+           class:red={isProgramChannel(channel)}
+           class:green={isPreviewChannel(channel)}
+           on:click={e=>changePreview(channel)}><p>{channel.label}</p></div>
     {/each}
     </div>
   </section>
@@ -616,10 +611,10 @@ function fadeToBlack() {
     <h2 class="section">Next Transition</h2>
     <div class="well">
       <div class="button-spacer"></div>
-      <div class="button" class:red={switchers[0].video.ME[0].upstreamKeyState[0]} on:click={e=>toggleUpstreamKeyState(0)}>ON AIR</div>
+      <div class="button" class:red={switchers[0].video.ME[0].upstreamKeyState[0]} on:click={e=>toggleUpstreamKeyState(0)}><p>ON<br>AIR</p></div>
       <br>
-      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextBackgroundState} on:click={e=>toggleUpstreamKeyNextBackground()}>BKGD</div>
-      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextState[0]} on:click={e=>toggleUpstreamKeyNextState(0)}>Key 1</div>
+      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextBackgroundState} on:click={e=>toggleUpstreamKeyNextBackground()}><p>BKGD</p></div>
+      <div class="button" class:yellow={switchers[0].video.ME[0].upstreamKeyNextState[0]} on:click={e=>toggleUpstreamKeyNextState(0)}><p>Key 1</p></div>
     </div>
   </section>
 
@@ -628,29 +623,33 @@ function fadeToBlack() {
     <div class="well">
       <div class="button"
           class:yellow={switchers[0].video.ME[0].transitionStyle==0}
-          on:click={e=>changeTransitionType(0)}>MIX</div>
+          on:click={e=>changeTransitionType(0)}><p>MIX</p></div>
       <div class="button"
         class:yellow={switchers[0].video.ME[0].transitionStyle==1}
-        on:click={e=>changeTransitionType(1)}>DIP</div>
+        on:click={e=>changeTransitionType(1)}><p>DIP</p></div>
       <div class="button"
            class:yellow={switchers[0].video.ME[0].transitionStyle==2}
-           on:click={e=>changeTransitionType(2)}>WIPE</div>
+           on:click={e=>changeTransitionType(2)}><p>WIPE</p></div>
+      {#if switchers[0].topology.numberOfStingers > 0}
       <div class="button"
            class:yellow={switchers[0].video.ME[0].transitionStyle==3}
-           class:disabled={switchers[0].topology.numberOfStingers==0}
-           on:click={e=>changeTransitionType(3)}>STING</div>
+           on:click={e=>changeTransitionType(3)}><p>STING</p></div>
+      {/if}
+      {#if switchers[0].topology.numberOfDVEs > 0}
       <div class="button"
            class:yellow={switchers[0].video.ME[0].transitionStyle==4}
-           class:disabled={switchers[0].topology.numberOfDVEs==0}
-           on:click={e=>changeTransitionType(4)}>DVE</div>
-      <br>
+           on:click={e=>changeTransitionType(4)}><p>DVE</p></div>
+      {/if}
       <div class="button"
-           on:click={changeTransitionPreview}>PREV</div>
+           on:click={changeTransitionPreview}><p>PREV<br>TRAN</p></div>
       <div class="button"
-           on:click={cutTransition}>CUT</div>
+           on:click={cutTransition}><p>CUT</p></div>
       <div class="button"
            class:red={switchers[0].video.ME[0].transitionPosition != 0}
-           on:click={autoTransition}>AUTO</div>
+           on:click={autoTransition}><p>AUTO</p></div>
+      <input class="slider" type="range" min="0" max="100"
+             bind:value={switchers[0].video.ME[0].transitionPosition}
+             on:input={e=>changeTransitionPosition(this.value)}>
     </div>
   </section>
 </div>
@@ -660,14 +659,14 @@ function fadeToBlack() {
     <h2 class="section">Downstream Key</h2>
     <div class="well">
       <div class="button-column">
-        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[0]} on:click={e=>toggleDownstreamKeyTie(1)}>TIE</div>
-        <div class="button" class:red={switchers[0].video.downstreamKeyOn[0]} on:click={e=>toggleDownstreamKeyOn(1)}>ON AIR</div>
-        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(1)}>AUTO</div>
+        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[0]} on:click={e=>toggleDownstreamKeyTie(1)}><p>TIE</p></div>
+        <div class="button" class:red={switchers[0].video.downstreamKeyOn[0]} on:click={e=>toggleDownstreamKeyOn(1)}><p>ON<br>AIR</p></div>
+        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(1)}><p>AUTO</p></div>
       </div>
       <div class="button-column">
-        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[1]} on:click={e=>toggleDownstreamKeyTie(2)}>TIE</div>
-        <div class="button" class:red={switchers[0].video.downstreamKeyOn[1]} on:click={e=>toggleDownstreamKeyOn(2)}>ON AIR</div>
-        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(2)}>AUTO</div>
+        <div class="button" class:yellow={switchers[0].video.downstreamKeyTie[1]} on:click={e=>toggleDownstreamKeyTie(2)}><p>TIE</p></div>
+        <div class="button" class:red={switchers[0].video.downstreamKeyOn[1]} on:click={e=>toggleDownstreamKeyOn(2)}><p>ON<br>AIR</p></div>
+        <div class="button" class:red={false} on:click={e=>autoDownstreamKey(2)}><p>AUTO</p></div>
       </div>
     </div>
   </section>
@@ -675,7 +674,7 @@ function fadeToBlack() {
   <section class="fade-to-black">
     <h2 class="section">Fade to Black</h2>
     <div class="well">
-      <div class="button" class:red={switchers[0].video.ME[0].fadeToBlack} on:click={fadeToBlack}>FTB</div>
+      <div class="button" class:red={switchers[0].video.ME[0].fadeToBlack} on:click={fadeToBlack}><p>FTB</p></div>
     </div>
   </section>
 </div>
