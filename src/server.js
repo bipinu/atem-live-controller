@@ -1,5 +1,5 @@
 const express    = require('express');
-const bodyParser = require('body-parser');
+const fileUpload = require('express-fileupload');
 const ATEM       = require('applest-atem');
 const config     = require('../config.json');
 
@@ -28,88 +28,72 @@ for (var switcher of config.switchers) {
   device += 1;
 }
 
-// app.use(bodyParser.json());
-app.use('/', express.static(__dirname + '/../public'));
+app.use(fileUpload({
+  limits: { fileSize: 50 * 1024 * 1024 },
+}));
+
+app.post('/uploadMedia', function (req, res) {
+  console.log(req.files.media); // the uploaded file object
+  if (Object.keys(req.files).length == 0) {
+    return res.status(400).send('No files were uploaded.');
+  }
+  let fileUploader = new ATEM.FileUploader(switchers[0]);
+  fileUploader.uploadFromPNGBuffer(req.files.media.data, req.params.bankIndex || 0);
+  return res.status(200).send('Media was successfuly uploaded.');
+});
+
+app.use(express.static(__dirname + '/../public', {
+  index: 'index.html',
+}));
 
 app.ws('/ws', function(ws, req) {
   const ip = req.connection.remoteAddress;
   console.log(ip, 'connected');
-  ws.send(JSON.stringify({channels: config.channels}));
+  // initialize client with all switchers
+  for (var atem of switchers) {
+    client.send(JSON.stringify(atem.state));
+  }
 
   ws.on('message', function incoming(message) {
+    /* JSON-RPC v2 compatible call */
     console.log(message);
-    let data = JSON.parse(message);
-    if (data.changePreviewInput) {
-      const { device, input } = data.changePreviewInput;
-      switchers[device].changePreviewInput(input);
-    }
-    if (data.changeProgramInput) {
-      const { device, input } = data.changeProgramInput;
-      switchers[device].changeProgramInput(input);
-    }
-    if (data.autoTransition) {
-      const { device } = data.autoTransition;
-      switchers[device].autoTransition();
-    }
-    if (data.cutTransition) {
-      const { device } = data.cutTransition;
-      switchers[device].cutTransition();
-    }
-    if (data.changeTransitionPreview) {
-      const { device, state, me } = data.changeTransitionPreview;
-      switchers[device].changeTransitionPreview(state, me);
-    }
-    if (data.changeTransitionPosition) {
-      const { device, position }   = data.changeTransitionPosition;
-      switchers[device].changeTransitionPosition(position);
-    }
-    if (data.changeTransitionType) {
-      const { type } = data.changeTransitionType;
-      for (switcher of switchers) {
-        switcher.changeTransitionType(type);
-      }
-    }
-    if (data.changeUpstreamKeyState) {
-      const { device, number, state } = data.changeUpstreamKeyState;
-      switchers[device].changeUpstreamKeyState(number, state);
-    }
-    if (data.changeUpstreamKeyNextBackground) {
-      const { device, state } = data.changeUpstreamKeyNextBackground;
-      switchers[device].changeUpstreamKeyNextBackground(state);
-    }
-    if (data.changeUpstreamKeyNextState) {
-      const { device, number, state } = data.changeUpstreamKeyNextState;
-      switchers[device].changeUpstreamKeyNextState(number, state);
-    }
-    if (data.changeDownstreamKeyOn) {
-      const { device, number, state } = data.changeDownstreamKeyOn;
-      switchers[device].changeDownstreamKeyOn(number, state);
-    }
-    if (data.changeDownstreamKeyTie) {
-      const { device, number, state } = data.changeDownstreamKeyTie;
-      switchers[device].changeDownstreamKeyTie(number, state);
-    }
-    if (data.autoDownstreamKey) {
-      const { device, number } = data.autoDownstreamKey;
-      switchers[device].autoDownstreamKey(number);
-    }
-    if (data.fadeToBlack) {
-      const { device } = data.fadeToBlack;
-      switchers[device].fadeToBlack();
+    const data = JSON.parse(message);
+    const params = data.params;
+    const atem = switchers[params.device || 0];
+
+    switch (data.method) {
+      case 'changePreviewInput':
+      case 'changeProgramInput':
+        atem[method](params.input);
+      break;
+      case 'autoTransition':
+      case 'cutTransition':
+      case 'fadeToBlack':
+        atem[method]();
+      break;
+      case 'changeUpstreamKeyState':
+      case 'changeUpstreamKeyNextState':
+      case 'changeDownstreamKeyOn':
+      case 'changeDownstreamKeyTie':
+        atem[method](params.number, params.state);
+      break;
+      case 'changeTransitionPreview':
+        atem[method](params.state, params.me);
+      break;
+      case 'changeTransitionPosition':
+        atem[method](params.position);
+      break;
+      case 'changeTransitionType':
+        atem[method](params.type);
+      break;
+      case 'changeUpstreamKeyNextBackground':
+        atem[method](params.state);
+      break;
+      case 'autoDownstreamKey':
+        atem[method](params.number);
+      break;
     }
   });
 });
-
-function broadcastSwitcherStates() {
-  const states = [];
-  for (atem of switchers) {
-    states.push(atem.state);
-  }
-  for (let client of CLIENTS) {
-    client.send(JSON.stringify({ switchers: states}));
-  }
-}
-// atem.on('stateChanged') fires enough
-// setInterval(broadcastSwitcherStates, 5000);
 
 app.listen(8080);

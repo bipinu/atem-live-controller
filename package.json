@@ -1,37 +1,32 @@
 {
-  "name": "live-controller",
+  "name": "atem-live-controller",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "HTML5 client-server controller for Blackmagic Design ATEM switchers",
+  "main": "src/server.js",
   "scripts": {
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
-    "dev": "run-p start:dev autobuild",
-    "start": "sirv public",
-    "start:dev": "sirv public --dev"
+    "dev": "run-p start autobuild",
+    "start": "node src/server.js"
   },
-  "author": "",
+  "author": "Filip Hanes <filip.hanes@pm.me>",
   "license": "MIT",
   "dependencies": {
-    "angular": "~1.4.3",
-    "applest-atem": "^0.2.4",
-    "body-parser": "^1.18.2",
-    "copy-webpack-plugin": "^4.0.1",
+    "applest-atem": "0.4.2",
     "express": "^4.16.1",
+    "express-fileupload": "^1.1.5",
     "express-ws": "^4.0.0",
-    "hammerjs": "~2.0.4",
-    "webpack": "^2.6.1",
+    "feather-icons": "^4.22.1",
     "ws": "^7.0.1"
   },
   "devDependencies": {
     "npm-run-all": "^4.1.5",
-    "rollup": "^1.10.1",
+    "rollup": "^1.16.2",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-livereload": "^1.0.0",
-    "rollup-plugin-node-resolve": "^4.2.3",
-    "rollup-plugin-svelte": "^5.0.3",
+    "rollup-plugin-livereload": "^1.0.1",
+    "rollup-plugin-node-resolve": "^4.2.4",
+    "rollup-plugin-svelte": "^5.1.0",
     "rollup-plugin-terser": "^4.0.4",
-    "sirv-cli": "^0.4.0",
-    "svelte": "^3.0.0"
+    "svelte": "^3.6.1"
   }
 }
