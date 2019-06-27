@@ -46,6 +46,10 @@ header h1 {
   vertical-align: middle;
 }
 
+.tab:hover {
+  color: orange;
+}
+
 .time {
   vertical-align: middle;
   text-align: center;
@@ -87,7 +91,7 @@ section.downstream-key .well {
 }
 section.transition {
   flex-grow: 1;
-  margin: 0 1rem;
+  /* margin: 0 1rem; */
 }
 /*
  * Button
@@ -198,14 +202,14 @@ section.transition {
  * Slider
  */
 .slider {
-  width: 100%;
+  min-width: 15rem;
   cursor: pointer;
 }
 
 #switcher {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   margin-bottom: 1rem;
 }
 
@@ -217,11 +221,29 @@ section.transition {
 	border-radius: 7px;
   box-shadow: 0px 0px 3px black inset;
   color: #999999;
+  cursor: pointer;
   display: inline-block;
   line-height: 3;
-  width: 10rem;
-  height: 6rem;
+  width: 16rem;
+  height: 9rem;
+  overflow: hidden;
   padding: 1rem;
-  margin: 0 2rem 2rem 0;
+  margin: 0 1rem 1rem 0;
   text-align: center;
+  position: relative;
+  z-index: 10;
+}
+
+.media-thumb img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  line-height: 10rem; /* for alt text */
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.media-thumb input {
+  visibility: hidden;
 }

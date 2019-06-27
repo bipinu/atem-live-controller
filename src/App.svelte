@@ -72,8 +72,27 @@
     }
   }
 
-  function uploadMediaFile(event) {
-
+  function uploadMediaFile(file, number) {
+    let img, reader;
+    if (file.type.match(/image.*/)) {
+      img = document.querySelectorAll('.media-thumb img')[number-1];
+      reader = new FileReader();
+      reader.onload = function(e) {
+        img.onload = function() {
+          let canvas, ctx;
+          canvas = document.createElement("canvas");
+          canvas.width = 1280
+          canvas.height = 720
+          ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, 1280, 720);
+          // upload canvas.toDataURL("image/png")
+        }
+        img.src = e.target.result;
+      }
+      reader.readAsDataURL(file);
+    } else {
+      alert('This file is note an image.');
+    }
   }
 </script>
 
@@ -193,7 +212,7 @@
   </section>
 
   <section class="downstream-key">
-    <h2 class="section">Downstream Key</h2>
+    <h2 class="section">Downstream Key 1</h2>
     <div class="well">
       <div
         class="button"
@@ -213,6 +232,11 @@
         on:click={e => atem.autoDownstreamKey(1)}>
         <p>AUTO</p>
       </div>
+    </div>
+  </section>
+  <section class="downstream-key">
+    <h2 class="section">Downstream Key 2</h2>
+    <div class="well">
       <div
         class="button"
         class:yellow={atem.state.video.downstreamKeyTie[1]}
@@ -248,13 +272,17 @@
 </div><!-- screen switcher-->
 
 <div id="media" class="screen">
-  <div class="media-thumb">
-    1
-    <input type="file" name="media"  on:change={e=>uploadMediaFile(1)}/>
+  <div class="media-thumb"
+       on:drop={e=>uploadMediaFile(e.dataTransfer.files[0], 1)}
+       on:click={e=>this.querySelector('input').click()}>
+    <img alt="Media 2" />
+    <input type="file" name="media" on:change={e=>uploadMediaFile(this.files[0], 1)}/>
   </div>
-  <div class="media-thumb">
-    2
-    <input type="file" name="media" on:change={e=>uploadMediaFile(2)}/>
+  <div class="media-thumb"
+       on:drop={e=>uploadMediaFile(e.dataTransfer.files[0], 2)}
+       on:click={e=>this.querySelector('input').click()}>
+    <img alt="Media 2" />
+    <input type="file" name="media" on:change={e=>uploadMediaFile(this.files[0], 2)}/>
   </div>
 </div><!-- screen media-->
 {/each}

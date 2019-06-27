@@ -3151,7 +3151,7 @@ var app = (function () {
 
     /******/ });
     });
-    //# sourceMappingURL=feather.js.map
+
     });
 
     var feather$1 = unwrapExports(feather);
@@ -3245,7 +3245,7 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (94:6) {#each atem.state.visibleChannels as channel}
+    // (113:6) {#each atem.state.visibleChannels as channel}
     function create_each_block_1(ctx) {
     	var div, p, t0_value = ctx.channel.label, t0, t1, dispose;
 
@@ -3259,11 +3259,11 @@ var app = (function () {
     			p = element("p");
     			t0 = text(t0_value);
     			t1 = space();
-    			add_location(p, file, 99, 10, 2777);
+    			add_location(p, file, 118, 10, 3442);
     			attr(div, "class", "button");
     			toggle_class(div, "red", ctx.atem.isProgramChannel(ctx.channel));
     			toggle_class(div, "green", ctx.atem.isPreviewChannel(ctx.channel));
-    			add_location(div, file, 94, 8, 2574);
+    			add_location(div, file, 113, 8, 3239);
     			dispose = listen(div, "click", click_handler);
     		},
 
@@ -3296,7 +3296,7 @@ var app = (function () {
     	};
     }
 
-    // (173:6) {#if atem.state.topology.numberOfStingers > 0}
+    // (192:6) {#if atem.state.topology.numberOfStingers > 0}
     function create_if_block_1(ctx) {
     	var div, p, dispose;
 
@@ -3309,10 +3309,10 @@ var app = (function () {
     			div = element("div");
     			p = element("p");
     			p.textContent = "STING";
-    			add_location(p, file, 177, 10, 5081);
+    			add_location(p, file, 196, 10, 5746);
     			attr(div, "class", "button");
     			toggle_class(div, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 3);
-    			add_location(div, file, 173, 8, 4916);
+    			add_location(div, file, 192, 8, 5581);
     			dispose = listen(div, "click", click_handler_7);
     		},
 
@@ -3338,7 +3338,7 @@ var app = (function () {
     	};
     }
 
-    // (181:6) {#if atem.state.topology.numberOfDVEs > 0}
+    // (200:6) {#if atem.state.topology.numberOfDVEs > 0}
     function create_if_block(ctx) {
     	var div, p, dispose;
 
@@ -3351,10 +3351,10 @@ var app = (function () {
     			div = element("div");
     			p = element("p");
     			p.textContent = "DVE";
-    			add_location(p, file, 185, 10, 5343);
+    			add_location(p, file, 204, 10, 6008);
     			attr(div, "class", "button");
     			toggle_class(div, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 4);
-    			add_location(div, file, 181, 8, 5178);
+    			add_location(div, file, 200, 8, 5843);
     			dispose = listen(div, "click", click_handler_8);
     		},
 
@@ -3380,9 +3380,9 @@ var app = (function () {
     	};
     }
 
-    // (80:0) {#each switchers as atem}
+    // (99:0) {#each switchers as atem}
     function create_each_block(ctx) {
-    	var header, h1, t0_value = ctx.atem.state._pin, t0, t1, a0, t2, t3, a1, t4, t5, a2, t6, t7, a3, t8, t9, a4, t10, t11, div22, section0, h20, t13, div0, t14, section1, h21, t16, div3, div1, p0, t18, div2, p1, t20, input0, t21, section2, h22, t23, div7, div4, p2, t25, div5, p3, t26, br0, t27, t28, div6, p4, t30, section3, h23, t32, div12, div8, p5, t34, div9, p6, t36, div10, p7, t38, t39, t40, div11, p8, t41, br1, t42, t43, section4, h24, t45, div19, div13, p9, t47, div14, p10, t48, br2, t49, t50, div15, p11, t52, div16, p12, t54, div17, p13, t55, br3, t56, t57, div18, p14, t59, section5, h25, t61, div21, div20, p15, t63, div25, div23, t64, input1, t65, div24, t66, input2, t67, current, dispose;
+    	var header, h1, t0_value = ctx.atem.state._pin, t0, t1, a0, t2, t3, a1, t4, t5, a2, t6, t7, a3, t8, t9, a4, t10, t11, div23, section0, h20, t13, div0, t14, section1, h21, t16, div3, div1, p0, t18, div2, p1, t20, input0, t21, section2, h22, t23, div7, div4, p2, t25, div5, p3, t26, br0, t27, t28, div6, p4, t30, section3, h23, t32, div12, div8, p5, t34, div9, p6, t36, div10, p7, t38, t39, t40, div11, p8, t41, br1, t42, t43, section4, h24, t45, div16, div13, p9, t47, div14, p10, t48, br2, t49, t50, div15, p11, t52, section5, h25, t54, div20, div17, p12, t56, div18, p13, t57, br3, t58, t59, div19, p14, t61, section6, h26, t63, div22, div21, p15, t65, div26, div24, img0, t66, input1, t67, div25, img1, t68, input2, t69, current, dispose;
 
     	var feather0 = new Feather({ props: { icon: "grid" }, $$inline: true });
 
@@ -3494,7 +3494,7 @@ var app = (function () {
     			feather4.$$.fragment.c();
     			t10 = text("Settings");
     			t11 = space();
-    			div22 = element("div");
+    			div23 = element("div");
     			section0 = element("section");
     			h20 = element("h2");
     			h20.textContent = "Program & Preview";
@@ -3569,9 +3569,9 @@ var app = (function () {
     			t43 = space();
     			section4 = element("section");
     			h24 = element("h2");
-    			h24.textContent = "Downstream Key";
+    			h24.textContent = "Downstream Key 1";
     			t45 = space();
-    			div19 = element("div");
+    			div16 = element("div");
     			div13 = element("div");
     			p9 = element("p");
     			p9.textContent = "TIE";
@@ -3586,178 +3586,195 @@ var app = (function () {
     			p11 = element("p");
     			p11.textContent = "AUTO";
     			t52 = space();
-    			div16 = element("div");
-    			p12 = element("p");
-    			p12.textContent = "TIE";
-    			t54 = space();
-    			div17 = element("div");
-    			p13 = element("p");
-    			t55 = text("ON");
-    			br3 = element("br");
-    			t56 = text("AIR");
-    			t57 = space();
-    			div18 = element("div");
-    			p14 = element("p");
-    			p14.textContent = "AUTO";
-    			t59 = space();
     			section5 = element("section");
     			h25 = element("h2");
-    			h25.textContent = "Fade to Black";
-    			t61 = space();
-    			div21 = element("div");
+    			h25.textContent = "Downstream Key 2";
+    			t54 = space();
     			div20 = element("div");
+    			div17 = element("div");
+    			p12 = element("p");
+    			p12.textContent = "TIE";
+    			t56 = space();
+    			div18 = element("div");
+    			p13 = element("p");
+    			t57 = text("ON");
+    			br3 = element("br");
+    			t58 = text("AIR");
+    			t59 = space();
+    			div19 = element("div");
+    			p14 = element("p");
+    			p14.textContent = "AUTO";
+    			t61 = space();
+    			section6 = element("section");
+    			h26 = element("h2");
+    			h26.textContent = "Fade to Black";
+    			t63 = space();
+    			div22 = element("div");
+    			div21 = element("div");
     			p15 = element("p");
     			p15.textContent = "FTB";
-    			t63 = space();
-    			div25 = element("div");
-    			div23 = element("div");
-    			t64 = text("1\n    ");
-    			input1 = element("input");
     			t65 = space();
+    			div26 = element("div");
     			div24 = element("div");
-    			t66 = text("2\n    ");
-    			input2 = element("input");
+    			img0 = element("img");
+    			t66 = space();
+    			input1 = element("input");
     			t67 = space();
-    			add_location(h1, file, 81, 2, 2005);
+    			div25 = element("div");
+    			img1 = element("img");
+    			t68 = space();
+    			input2 = element("input");
+    			t69 = space();
+    			add_location(h1, file, 100, 2, 2670);
     			attr(a0, "href", "#switcher");
     			attr(a0, "class", "tab");
-    			add_location(a0, file, 82, 2, 2034);
+    			add_location(a0, file, 101, 2, 2699);
     			attr(a1, "href", "#media");
     			attr(a1, "class", "tab");
-    			add_location(a1, file, 83, 2, 2103);
+    			add_location(a1, file, 102, 2, 2768);
     			attr(a2, "href", "#audio");
     			attr(a2, "class", "tab");
-    			add_location(a2, file, 84, 2, 2166);
+    			add_location(a2, file, 103, 2, 2831);
     			attr(a3, "href", "#camera");
     			attr(a3, "class", "tab");
-    			add_location(a3, file, 85, 2, 2232);
+    			add_location(a3, file, 104, 2, 2897);
     			attr(a4, "href", "#settings");
     			attr(a4, "class", "tab");
-    			add_location(a4, file, 86, 2, 2298);
-    			add_location(header, file, 80, 0, 1994);
+    			add_location(a4, file, 105, 2, 2963);
+    			add_location(header, file, 99, 0, 2659);
     			attr(h20, "class", "section");
-    			add_location(h20, file, 91, 4, 2448);
+    			add_location(h20, file, 110, 4, 3113);
     			attr(div0, "class", "well");
-    			add_location(div0, file, 92, 4, 2495);
+    			add_location(div0, file, 111, 4, 3160);
     			attr(section0, "class", "channels");
-    			add_location(section0, file, 90, 2, 2417);
+    			add_location(section0, file, 109, 2, 3082);
     			attr(h21, "class", "section");
-    			add_location(h21, file, 106, 4, 2889);
-    			add_location(p0, file, 109, 8, 3013);
+    			add_location(h21, file, 125, 4, 3554);
+    			add_location(p0, file, 128, 8, 3678);
     			attr(div1, "class", "button");
-    			add_location(div1, file, 108, 6, 2954);
-    			add_location(p1, file, 115, 8, 3186);
+    			add_location(div1, file, 127, 6, 3619);
+    			add_location(p1, file, 134, 8, 3851);
     			attr(div2, "class", "button");
     			toggle_class(div2, "red", ctx.atem.state.video.ME[0].transitionPosition != 0);
-    			add_location(div2, file, 111, 6, 3043);
+    			add_location(div2, file, 130, 6, 3708);
     			attr(input0, "class", "slider");
     			attr(input0, "type", "range");
     			attr(input0, "min", "0");
     			attr(input0, "max", "100");
-    			add_location(input0, file, 117, 6, 3217);
+    			add_location(input0, file, 136, 6, 3882);
     			attr(div3, "class", "well");
-    			add_location(div3, file, 107, 4, 2929);
+    			add_location(div3, file, 126, 4, 3594);
     			attr(section1, "class", "transition");
-    			add_location(section1, file, 105, 2, 2856);
+    			add_location(section1, file, 124, 2, 3521);
     			attr(h22, "class", "section");
-    			add_location(h22, file, 128, 4, 3499);
-    			add_location(p2, file, 134, 8, 3746);
+    			add_location(h22, file, 147, 4, 4164);
+    			add_location(p2, file, 153, 8, 4411);
     			attr(div4, "class", "button");
     			toggle_class(div4, "yellow", ctx.atem.state.video.ME[0].upstreamKeyNextBackgroundState);
-    			add_location(div4, file, 130, 6, 3569);
-    			add_location(br0, file, 140, 13, 3937);
-    			add_location(p3, file, 140, 8, 3932);
+    			add_location(div4, file, 149, 6, 4234);
+    			add_location(br0, file, 159, 13, 4602);
+    			add_location(p3, file, 159, 8, 4597);
     			attr(div5, "class", "button");
     			toggle_class(div5, "red", ctx.atem.state.video.ME[0].upstreamKeyState[0]);
-    			add_location(div5, file, 136, 6, 3777);
-    			add_location(p4, file, 146, 8, 4136);
+    			add_location(div5, file, 155, 6, 4442);
+    			add_location(p4, file, 165, 8, 4801);
     			attr(div6, "class", "button");
     			toggle_class(div6, "yellow", ctx.atem.state.video.ME[0].upstreamKeyNextState[0]);
-    			add_location(div6, file, 142, 6, 3970);
+    			add_location(div6, file, 161, 6, 4635);
     			attr(div7, "class", "well");
-    			add_location(div7, file, 129, 4, 3544);
+    			add_location(div7, file, 148, 4, 4209);
     			attr(section2, "class", "next-transition");
-    			add_location(section2, file, 127, 2, 3461);
+    			add_location(section2, file, 146, 2, 4126);
     			attr(h23, "class", "section");
-    			add_location(h23, file, 152, 4, 4228);
-    			add_location(p5, file, 158, 8, 4456);
+    			add_location(h23, file, 171, 4, 4893);
+    			add_location(p5, file, 177, 8, 5121);
     			attr(div8, "class", "button");
     			toggle_class(div8, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 0);
-    			add_location(div8, file, 154, 6, 4299);
-    			add_location(p6, file, 164, 8, 4643);
+    			add_location(div8, file, 173, 6, 4964);
+    			add_location(p6, file, 183, 8, 5308);
     			attr(div9, "class", "button");
     			toggle_class(div9, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 1);
-    			add_location(div9, file, 160, 6, 4486);
-    			add_location(p7, file, 170, 8, 4830);
+    			add_location(div9, file, 179, 6, 5151);
+    			add_location(p7, file, 189, 8, 5495);
     			attr(div10, "class", "button");
     			toggle_class(div10, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 2);
-    			add_location(div10, file, 166, 6, 4673);
-    			add_location(br1, file, 189, 15, 5463);
-    			add_location(p8, file, 189, 8, 5456);
+    			add_location(div10, file, 185, 6, 5338);
+    			add_location(br1, file, 208, 15, 6128);
+    			add_location(p8, file, 208, 8, 6121);
     			attr(div11, "class", "button");
-    			add_location(div11, file, 188, 6, 5387);
+    			add_location(div11, file, 207, 6, 6052);
     			attr(div12, "class", "well");
-    			add_location(div12, file, 153, 4, 4274);
+    			add_location(div12, file, 172, 4, 4939);
     			attr(section3, "class", "transition-style");
-    			add_location(section3, file, 151, 2, 4189);
+    			add_location(section3, file, 170, 2, 4854);
     			attr(h24, "class", "section");
-    			add_location(h24, file, 195, 4, 5555);
-    			add_location(p9, file, 201, 8, 5776);
+    			add_location(h24, file, 214, 4, 6220);
+    			add_location(p9, file, 220, 8, 6443);
     			attr(div13, "class", "button");
     			toggle_class(div13, "yellow", ctx.atem.state.video.downstreamKeyTie[0]);
-    			add_location(div13, file, 197, 6, 5624);
-    			add_location(br2, file, 207, 13, 5958);
-    			add_location(p10, file, 207, 8, 5953);
+    			add_location(div13, file, 216, 6, 6291);
+    			add_location(br2, file, 226, 13, 6625);
+    			add_location(p10, file, 226, 8, 6620);
     			attr(div14, "class", "button");
     			toggle_class(div14, "red", ctx.atem.state.video.downstreamKeyOn[0]);
-    			add_location(div14, file, 203, 6, 5806);
-    			add_location(p11, file, 213, 8, 6104);
+    			add_location(div14, file, 222, 6, 6473);
+    			add_location(p11, file, 232, 8, 6771);
     			attr(div15, "class", "button");
     			toggle_class(div15, "red", false);
-    			add_location(div15, file, 209, 6, 5991);
-    			add_location(p12, file, 219, 8, 6287);
-    			attr(div16, "class", "button");
-    			toggle_class(div16, "yellow", ctx.atem.state.video.downstreamKeyTie[1]);
-    			add_location(div16, file, 215, 6, 6135);
-    			add_location(br3, file, 225, 13, 6469);
-    			add_location(p13, file, 225, 8, 6464);
-    			attr(div17, "class", "button");
-    			toggle_class(div17, "red", ctx.atem.state.video.downstreamKeyOn[1]);
-    			add_location(div17, file, 221, 6, 6317);
-    			add_location(p14, file, 231, 8, 6615);
-    			attr(div18, "class", "button");
-    			toggle_class(div18, "red", false);
-    			add_location(div18, file, 227, 6, 6502);
-    			attr(div19, "class", "well");
-    			add_location(div19, file, 196, 4, 5599);
+    			add_location(div15, file, 228, 6, 6658);
+    			attr(div16, "class", "well");
+    			add_location(div16, file, 215, 4, 6266);
     			attr(section4, "class", "downstream-key");
-    			add_location(section4, file, 194, 2, 5518);
+    			add_location(section4, file, 213, 2, 6183);
     			attr(h25, "class", "section");
-    			add_location(h25, file, 237, 4, 6703);
-    			add_location(p15, file, 243, 8, 6899);
-    			attr(div20, "class", "button");
-    			toggle_class(div20, "red", ctx.atem.state.video.ME[0].fadeToBlack);
-    			add_location(div20, file, 239, 6, 6771);
-    			attr(div21, "class", "well");
-    			add_location(div21, file, 238, 4, 6746);
-    			attr(section5, "class", "fade-to-black");
-    			add_location(section5, file, 236, 2, 6667);
-    			attr(div22, "id", "switcher");
-    			attr(div22, "class", "screen");
-    			add_location(div22, file, 88, 0, 2379);
+    			add_location(h25, file, 237, 4, 6859);
+    			add_location(p12, file, 243, 8, 7082);
+    			attr(div17, "class", "button");
+    			toggle_class(div17, "yellow", ctx.atem.state.video.downstreamKeyTie[1]);
+    			add_location(div17, file, 239, 6, 6930);
+    			add_location(br3, file, 249, 13, 7264);
+    			add_location(p13, file, 249, 8, 7259);
+    			attr(div18, "class", "button");
+    			toggle_class(div18, "red", ctx.atem.state.video.downstreamKeyOn[1]);
+    			add_location(div18, file, 245, 6, 7112);
+    			add_location(p14, file, 255, 8, 7410);
+    			attr(div19, "class", "button");
+    			toggle_class(div19, "red", false);
+    			add_location(div19, file, 251, 6, 7297);
+    			attr(div20, "class", "well");
+    			add_location(div20, file, 238, 4, 6905);
+    			attr(section5, "class", "downstream-key");
+    			add_location(section5, file, 236, 2, 6822);
+    			attr(h26, "class", "section");
+    			add_location(h26, file, 261, 4, 7498);
+    			add_location(p15, file, 267, 8, 7694);
+    			attr(div21, "class", "button");
+    			toggle_class(div21, "red", ctx.atem.state.video.ME[0].fadeToBlack);
+    			add_location(div21, file, 263, 6, 7566);
+    			attr(div22, "class", "well");
+    			add_location(div22, file, 262, 4, 7541);
+    			attr(section6, "class", "fade-to-black");
+    			add_location(section6, file, 260, 2, 7462);
+    			attr(div23, "id", "switcher");
+    			attr(div23, "class", "screen");
+    			add_location(div23, file, 107, 0, 3044);
+    			attr(img0, "alt", "Media 2");
+    			add_location(img0, file, 277, 4, 7958);
     			attr(input1, "type", "file");
     			attr(input1, "name", "media");
-    			add_location(input1, file, 252, 4, 7048);
-    			attr(div23, "class", "media-thumb");
-    			add_location(div23, file, 250, 2, 7012);
+    			add_location(input1, file, 278, 4, 7984);
+    			attr(div24, "class", "media-thumb");
+    			add_location(div24, file, 274, 2, 7807);
+    			attr(img1, "alt", "Media 2");
+    			add_location(img1, file, 283, 4, 8229);
     			attr(input2, "type", "file");
     			attr(input2, "name", "media");
-    			add_location(input2, file, 256, 4, 7164);
-    			attr(div24, "class", "media-thumb");
-    			add_location(div24, file, 254, 2, 7128);
-    			attr(div25, "id", "media");
-    			attr(div25, "class", "screen");
-    			add_location(div25, file, 249, 0, 6978);
+    			add_location(input2, file, 284, 4, 8255);
+    			attr(div25, "class", "media-thumb");
+    			add_location(div25, file, 280, 2, 8078);
+    			attr(div26, "id", "media");
+    			attr(div26, "class", "screen");
+    			add_location(div26, file, 273, 0, 7773);
 
     			dispose = [
     				listen(div1, "click", ctx.atem.cutTransition),
@@ -3775,12 +3792,16 @@ var app = (function () {
     				listen(div13, "click", click_handler_9),
     				listen(div14, "click", click_handler_10),
     				listen(div15, "click", click_handler_11),
-    				listen(div16, "click", click_handler_12),
-    				listen(div17, "click", click_handler_13),
-    				listen(div18, "click", click_handler_14),
-    				listen(div20, "click", ctx.atem.fadeToBlack),
+    				listen(div17, "click", click_handler_12),
+    				listen(div18, "click", click_handler_13),
+    				listen(div19, "click", click_handler_14),
+    				listen(div21, "click", ctx.atem.fadeToBlack),
     				listen(input1, "change", ctx.change_handler),
-    				listen(input2, "change", ctx.change_handler_1)
+    				listen(div24, "drop", ctx.drop_handler),
+    				listen(div24, "click", click_handler_15),
+    				listen(input2, "change", ctx.change_handler_1),
+    				listen(div25, "drop", ctx.drop_handler_1),
+    				listen(div25, "click", click_handler_16)
     			];
     		},
 
@@ -3809,8 +3830,8 @@ var app = (function () {
     			mount_component(feather4, a4, null);
     			append(a4, t10);
     			insert(target, t11, anchor);
-    			insert(target, div22, anchor);
-    			append(div22, section0);
+    			insert(target, div23, anchor);
+    			append(div23, section0);
     			append(section0, h20);
     			append(section0, t13);
     			append(section0, div0);
@@ -3819,8 +3840,8 @@ var app = (function () {
     				each_blocks[i].m(div0, null);
     			}
 
-    			append(div22, t14);
-    			append(div22, section1);
+    			append(div23, t14);
+    			append(div23, section1);
     			append(section1, h21);
     			append(section1, t16);
     			append(section1, div3);
@@ -3834,8 +3855,8 @@ var app = (function () {
 
     			input0.value = ctx.atem.state.video.ME[0].transitionPosition;
 
-    			append(div22, t21);
-    			append(div22, section2);
+    			append(div23, t21);
+    			append(div23, section2);
     			append(section2, h22);
     			append(section2, t23);
     			append(section2, div7);
@@ -3850,8 +3871,8 @@ var app = (function () {
     			append(div7, t28);
     			append(div7, div6);
     			append(div6, p4);
-    			append(div22, t30);
-    			append(div22, section3);
+    			append(div23, t30);
+    			append(div23, section3);
     			append(section3, h23);
     			append(section3, t32);
     			append(section3, div12);
@@ -3873,51 +3894,57 @@ var app = (function () {
     			append(p8, t41);
     			append(p8, br1);
     			append(p8, t42);
-    			append(div22, t43);
-    			append(div22, section4);
+    			append(div23, t43);
+    			append(div23, section4);
     			append(section4, h24);
     			append(section4, t45);
-    			append(section4, div19);
-    			append(div19, div13);
+    			append(section4, div16);
+    			append(div16, div13);
     			append(div13, p9);
-    			append(div19, t47);
-    			append(div19, div14);
+    			append(div16, t47);
+    			append(div16, div14);
     			append(div14, p10);
     			append(p10, t48);
     			append(p10, br2);
     			append(p10, t49);
-    			append(div19, t50);
-    			append(div19, div15);
+    			append(div16, t50);
+    			append(div16, div15);
     			append(div15, p11);
-    			append(div19, t52);
-    			append(div19, div16);
-    			append(div16, p12);
-    			append(div19, t54);
-    			append(div19, div17);
-    			append(div17, p13);
-    			append(p13, t55);
-    			append(p13, br3);
-    			append(p13, t56);
-    			append(div19, t57);
-    			append(div19, div18);
-    			append(div18, p14);
-    			append(div22, t59);
-    			append(div22, section5);
+    			append(div23, t52);
+    			append(div23, section5);
     			append(section5, h25);
-    			append(section5, t61);
-    			append(section5, div21);
-    			append(div21, div20);
-    			append(div20, p15);
-    			insert(target, t63, anchor);
-    			insert(target, div25, anchor);
-    			append(div25, div23);
-    			append(div23, t64);
-    			append(div23, input1);
-    			append(div25, t65);
-    			append(div25, div24);
+    			append(section5, t54);
+    			append(section5, div20);
+    			append(div20, div17);
+    			append(div17, p12);
+    			append(div20, t56);
+    			append(div20, div18);
+    			append(div18, p13);
+    			append(p13, t57);
+    			append(p13, br3);
+    			append(p13, t58);
+    			append(div20, t59);
+    			append(div20, div19);
+    			append(div19, p14);
+    			append(div23, t61);
+    			append(div23, section6);
+    			append(section6, h26);
+    			append(section6, t63);
+    			append(section6, div22);
+    			append(div22, div21);
+    			append(div21, p15);
+    			insert(target, t65, anchor);
+    			insert(target, div26, anchor);
+    			append(div26, div24);
+    			append(div24, img0);
     			append(div24, t66);
-    			append(div24, input2);
-    			append(div25, t67);
+    			append(div24, input1);
+    			append(div26, t67);
+    			append(div26, div25);
+    			append(div25, img1);
+    			append(div25, t68);
+    			append(div25, input2);
+    			append(div26, t69);
     			current = true;
     		},
 
@@ -3992,9 +4019,9 @@ var app = (function () {
     			if (changed.switchers) {
     				toggle_class(div13, "yellow", ctx.atem.state.video.downstreamKeyTie[0]);
     				toggle_class(div14, "red", ctx.atem.state.video.downstreamKeyOn[0]);
-    				toggle_class(div16, "yellow", ctx.atem.state.video.downstreamKeyTie[1]);
-    				toggle_class(div17, "red", ctx.atem.state.video.downstreamKeyOn[1]);
-    				toggle_class(div20, "red", ctx.atem.state.video.ME[0].fadeToBlack);
+    				toggle_class(div17, "yellow", ctx.atem.state.video.downstreamKeyTie[1]);
+    				toggle_class(div18, "red", ctx.atem.state.video.downstreamKeyOn[1]);
+    				toggle_class(div21, "red", ctx.atem.state.video.ME[0].fadeToBlack);
     			}
     		},
 
@@ -4039,7 +4066,7 @@ var app = (function () {
 
     			if (detaching) {
     				detach(t11);
-    				detach(div22);
+    				detach(div23);
     			}
 
     			destroy_each(each_blocks, detaching);
@@ -4048,8 +4075,8 @@ var app = (function () {
     			if (if_block1) if_block1.d();
 
     			if (detaching) {
-    				detach(t63);
-    				detach(div25);
+    				detach(t65);
+    				detach(div26);
     			}
 
     			run_all(dispose);
@@ -4142,8 +4169,35 @@ var app = (function () {
     	};
     }
 
-    function uploadMediaFile(event) {
+    function uploadMediaFile(file, number) {
+      let img, reader;
+      if (file.type.match(/image.*/)) {
+        img = document.querySelectorAll('.media-thumb img')[number-1];
+        reader = new FileReader();
+        reader.onload = function(e) {
+          img.onload = function() {
+            let canvas, ctx;
+            canvas = document.createElement("canvas");
+            canvas.width = 1280;
+            canvas.height = 720;
+            ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0, 1280, 720);
+            // upload canvas.toDataURL("image/png")
+          };
+          img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        alert('This file is note an image.');
+      }
+    }
 
+    function click_handler_15(e) {
+    	return this.querySelector('input').click();
+    }
+
+    function click_handler_16(e) {
+    	return this.querySelector('input').click();
     }
 
     function instance$1($$self, $$props, $$invalidate) {
@@ -4276,11 +4330,19 @@ var app = (function () {
     	}
 
     	function change_handler(e) {
-    		return uploadMediaFile();
+    		return uploadMediaFile(this.files[0], 1);
+    	}
+
+    	function drop_handler(e) {
+    		return uploadMediaFile(e.dataTransfer.files[0], 1);
     	}
 
     	function change_handler_1(e) {
-    		return uploadMediaFile();
+    		return uploadMediaFile(this.files[0], 2);
+    	}
+
+    	function drop_handler_1(e) {
+    		return uploadMediaFile(e.dataTransfer.files[0], 2);
     	}
 
     	return {
@@ -4303,7 +4365,9 @@ var app = (function () {
     		click_handler_13,
     		click_handler_14,
     		change_handler,
-    		change_handler_1
+    		drop_handler,
+    		change_handler_1,
+    		drop_handler_1
     	};
     }
 
