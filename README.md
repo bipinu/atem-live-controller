@@ -10,8 +10,7 @@ The customizable video switchers web controller.
 
 # Installation
 - Copy `config.json.sample` to `config.json`
-- Install dependencies with npm `pnpm install
-- Prepare assets with webpack
+- Install dependencies with npm `npm install` or `pnpm install` or `yarn install`
 
 ```sh
 cp config.json.sample config.json
@@ -28,15 +27,19 @@ or
 ```sh
 node ./src/server.js
 ```
-or
-run with [PM2](http://pm2.keymetrics.io/)
+or run with [PM2](http://pm2.keymetrics.io/)
 ```sh
 pm2 start process.yml
 ```
-Then go to this address in your browser: `http://localhost:8080/`
+or when in development mode
+```sh
+npm start dev
+```
+Then go to this address in your browser: `http://localhost:8080/` or `http://host:port/` which is set in config.json.
 
 # Screenshots
-![](docs/ipad-mini-demo.png)
+<img src="docs/screen-desktop.png" width="800">
+<img src="docs/screen-mobile.png" width="200">
 
 # Contributing
 1. Fork it ( https://github.com/filiphanes/atem-live-controller )
@@ -45,6 +48,18 @@ Then go to this address in your browser: `http://localhost:8080/`
 4. Commit your changes (`git commit -am 'Add some feature'`)
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create new Pull Request
+
+# TODO
+- media uploads
+- settings tab
+- audio control tab
+- camera control tab
+- support more atem functionality
+
+# Thanks
+- Font made by "とろ庵" http://www.trojanbear.net/s/category/font
+- svelte framework
+- applest-atem library for communication with atem hardware
 
 # License
 The MIT License (MIT)
@@ -68,14 +83,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-
-# Thanks
-- Font made by "とろ庵" http://www.trojanbear.net/s/category/font
-- svelte framework
-- applest-atem library for communication with atem hardware
-
-# TODO
-- media upload on its own tab
-- show connection status to server.js and to device
-- settings tab
-- support more atem functionality

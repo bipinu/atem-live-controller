@@ -5,6 +5,7 @@
 body {
   margin: 0;
   background-color: #333;
+  color: #ddd;
   box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
 }
@@ -34,6 +35,19 @@ header h1 {
   padding: 0 1rem;
 }
 
+@media only screen and (max-width: 460px) {
+  header {
+    padding: .5rem 1rem;
+  }
+  header h1 {
+    font-size: 1rem;
+    line-height: 1.3rem;
+  }
+  .screen {
+    padding: 0 .5rem;
+  }  
+}
+
 .tab {
   display: inline-block;
   width: 3rem;
@@ -46,8 +60,15 @@ header h1 {
   vertical-align: middle;
 }
 
-.tab:hover {
+a.tab:hover {
   color: orange;
+}
+
+.connection-status {
+  color: red;
+}
+.connection-status.connected {
+  color: green;
 }
 
 .time {
@@ -59,20 +80,21 @@ header h1 {
   color: #ddd;
   line-height: 42px;
   font-family: 'LetsGoDigitalRegular';
-  text-shadow: 0 0 5px #fff; }
+  text-shadow: 0 0 5px #fff;
+}
 
+h2 {
+  font-weight: 300;
+}
 section {
   margin: 0 1rem 1rem 0;
 }
 
-section h2 {
+section h3 {
 	color: #999;
   font-size: 1rem;
   font-weight: 300;
   margin: .5rem;
-}
-
-.channels {
 }
 
 .well {
@@ -86,13 +108,11 @@ section h2 {
 	z-index: 0;
 }
 
-section.downstream-key .well {
-  /* flex-direction: column; */
-}
 section.transition {
   flex-grow: 1;
   /* margin: 0 1rem; */
 }
+
 /*
  * Button
  */
@@ -198,9 +218,6 @@ section.transition {
   display: inline-block;
 }
 
-/*
- * Slider
- */
 .slider {
   min-width: 15rem;
   cursor: pointer;
@@ -217,10 +234,6 @@ section.transition {
 }
 
 .media-thumb {
-	background: #222;
-	border-radius: 7px;
-  box-shadow: 0px 0px 3px black inset;
-  color: #999999;
   cursor: pointer;
   display: inline-block;
   line-height: 3;

@@ -306,9 +306,17 @@ var app = (function () {
         }
     }
 
+    /*
+        This class is very similar to node-applest-atem ATEM class
+        but this communicates via websocket to node server
+        These two ATEM classes could be joined in two ways:
+        - constructor decides if it communicates via udp socket to atem or websocket to node
+        - server could relay BMC protocol commands to websocket messages
+    */
+
     class ATEM {
         constructor() {
-            this.state = {
+            this._state = {
                 "topology": {
                     "numberOfMEs": 1,
                     "numberOfSources": 18,
@@ -466,7 +474,27 @@ var app = (function () {
                     ],
                     "downstreamKeyOn": [false, false],
                     "downstreamKeyTie": [false, false],
-                    "auxs": {}
+                    "auxs": {},
+                    "modes": {
+                        0: '525i59.94 NTSC',
+                        1: '625i 50 PAL',
+                        2: '525i59.94 NTSC 16:9',
+                        3: '625i 50 PAL 16:9',
+                        4: '720p50',
+                        5: '720p59.94',
+                        6: '1080i50',
+                        7: '1080i59.94',
+                        8: '1080p23.98',
+                        9: '1080p24',
+                        10: '1080p25',
+                        11: '1080p29.97',
+                        12: '1080p50',
+                        13: '1080p59.94',
+                        14: '2160p23.98',
+                        15: '2160p24',
+                        16: '2160p25',
+                        17: '2160p29.97',
+                    }
                 },
                 "audio": {
                     "hasMonitor": false,
@@ -532,111 +560,33 @@ var app = (function () {
                 "_ver0": 2,
                 "_ver1": 27,
                 "_pin": "ATEM Television Studio",
-                "model": 1,
-                "visibleChannels": [
-                    {
-                        "name": "Titulky",
-                        "label": "TIT",
-                        "id": "1",
-                        "device": 0,
-                        "input": "1"
-                    },
-                    {
-                        "name": "Video PC",
-                        "label": "VID",
-                        "id": "2",
-                        "device": 0,
-                        "input": "2"
-                    },
-                    {
-                        "name": "Cam 3",
-                        "label": "CAM3",
-                        "id": "3",
-                        "device": 0,
-                        "input": "3"
-                    },
-                    {
-                        "name": "Cam 4",
-                        "label": "CAM4",
-                        "id": "4",
-                        "device": 0,
-                        "input": "4"
-                    },
-                    {
-                        "name": "Cam 5",
-                        "label": "CAM5",
-                        "id": "5",
-                        "device": 0,
-                        "input": "5"
-                    },
-                    {
-                        "name": "Cam 6",
-                        "label": "CAM6",
-                        "id": "6",
-                        "device": 0,
-                        "input": "6"
-                    },
-                    {
-                        "name": "Black",
-                        "label": "Blk",
-                        "id": "0",
-                        "device": 0,
-                        "input": "0"
-                    },
-                    {
-                        "name": "Color 1",
-                        "label": "Col1",
-                        "id": "2001",
-                        "device": 0,
-                        "input": "2001"
-                    },
-                    {
-                        "name": "Color 2",
-                        "label": "Col2",
-                        "id": "2002",
-                        "device": 0,
-                        "input": "2002"
-                    },
-                    {
-                        "name": "Color Bars",
-                        "label": "Bars",
-                        "id": "1000",
-                        "device": 0,
-                        "input": "1000"
-                    },
-                    {
-                        "name": "Media 1 Logo",
-                        "label": "LOGO",
-                        "id": "3010",
-                        "device": 0,
-                        "input": "3010"
-                    },
-                    {
-                        "name": "Media Player 2",
-                        "label": "MP2",
-                        "id": "3020",
-                        "device": 0,
-                        "input": "3020"
-                    }
-                ]
+                "model": 1
             };
+            this.updateVisibleChannels();
         }
 
-        getState() {
-            return this.state;
+        get state() {
+            return this._state;
         }
+        set state(state) {
+            this._state = state;
+            this.updateVisibleChannels();
+        }
+
         setWebsocket(websocket) {
             this.websocket = websocket;
         }
 
         sendMessage(data) {
-            const message = JSON.stringify(data);
-            this.websocket.sendMessage(data);
+            if (this.websocket.readyState == WebSocket.OPEN) {
+                const message = JSON.stringify(data);
+                // console.log('sendMessage', message);
+                this.websocket.send(message);
+            } else {
+                console.warn('Websocket is closed. Cannot send message.');
+            }
         }
 
-        updateState(state) {
-            this.updateVisibleChannels();
-        }
         updateVisibleChannels() {
             this.state.visibleChannels = [];
             for (var id in this.state.channels) {
@@ -680,12 +630,12 @@ var app = (function () {
         }
 
         isProgramChannel(channel) {
-            return this.state.video.ME[0].programChannel === channel.input;
-        };
+            return this.state.video.ME[0].programInput === parseInt(channel.input);
+        }
 
         isPreviewChannel(channel) {
-            return this.state.video.ME[0].previewChannel === channel.input;
-        };
+            return this.state.video.ME[0].previewInput === parseInt(channel.input);
+        }
 
         changeProgramInput(input) {
             this.sendMessage({ method: 'changeProgramInput', params: { device: this.state.device, input } });
@@ -696,11 +646,11 @@ var app = (function () {
         }
 
         changeProgram(channel) {
-            changeProgramInput(this.state.device, channel.input);
+            return this.changeProgramInput(this.state.device, channel.input);
         }
 
         changePreview(channel) {
-            return changePreviewInput(channel.input);
+            return this.changePreviewInput(channel.input);
         };
 
         autoTransition() {
@@ -718,7 +668,7 @@ var app = (function () {
 
         changeTransitionPosition(percent) {
             console.assert(percent);
-            this.sendMessage({ method: 'changeTransitionPosition', params: { device: this.state.device, position: parseInt(percent) * 10000 } });
+            this.sendMessage({ method: 'changeTransitionPosition', params: { device: this.state.device, position: parseFloat(percent) * 10000 } });
         }
 
         changeTransitionType(type) {
@@ -736,18 +686,18 @@ var app = (function () {
         };
 
         toggleUpstreamKeyState(number) {
-            const status = !this.state.video.ME[0].upstreamKeyState[number];
-            this.sendMessage({ method: 'changeUpstreamKeyState', params: { device: this.state.device, number, status } });
+            const state = !this.state.video.ME[0].upstreamKeyState[number];
+            this.sendMessage({ method: 'changeUpstreamKeyState', params: { device: this.state.device, number, state } });
         };
 
         toggleDownstreamKeyTie(number) {
-            const status = !this.state.video.downstreamKeyTie[number];
-            this.sendMessage({ method: 'changeDownstreamKeyTie', params: { device: this.state.device, number, status } });
+            const state = !this.state.video.downstreamKeyTie[number];
+            this.sendMessage({ method: 'changeDownstreamKeyTie', params: { device: this.state.device, number, state } });
         };
 
         toggleDownstreamKeyOn(number) {
-            const status = !this.state.video.downstreamKeyOn[number];
-            this.sendMessage({ method: 'changeDownstreamKeyOn', params: { device: this.state.device, number, status } });
+            const state = !this.state.video.downstreamKeyOn[number];
+            this.sendMessage({ method: 'changeDownstreamKeyOn', params: { device: this.state.device, number, state } });
         };
 
         autoDownstreamKey(number) {
@@ -756,6 +706,38 @@ var app = (function () {
         fadeToBlack() {
             this.sendMessage({ method: 'fadeToBlack', params: { device: this.state.device } });
         }
+
+        uploadMediaFile(file, number) {
+            let img, reader;
+            let atem = this;
+            if (file.type.match(/image.*/)) {
+              img = document.querySelectorAll('.media-thumb img')[number];
+              reader = new FileReader();
+              reader.onload = function(e) {
+                img.onload = function() {
+                    let canvas, ctx;
+                    canvas = document.createElement("canvas");
+                    canvas.width = 1280;
+                    canvas.height = 720;
+                    ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, 1280, 720);
+                    // upload to server
+                    atem.sendMessage({
+                        method: "uploadMedia",
+                        params: {
+                            device: atem.state.device,
+                            number: number || 0,
+                            media: canvas.toDataURL("image/png")
+                        }
+                    });
+                };
+                img.src = e.target.result;
+              };
+              reader.readAsDataURL(file);
+            } else {
+              alert('This file is not an image.');
+            }
+          }
     }
 
     var atem = { ATEM };
@@ -3151,7 +3133,7 @@ var app = (function () {
 
     /******/ });
     });
-
+    //# sourceMappingURL=feather.js.map
     });
 
     var feather$1 = unwrapExports(feather);
@@ -3245,7 +3227,149 @@ var app = (function () {
     	return child_ctx;
     }
 
-    // (113:6) {#each atem.state.visibleChannels as channel}
+    // (87:50) {:else}
+    function create_else_block_1(ctx) {
+    	var current;
+
+    	var feather = new Feather({
+    		props: { icon: "alert-triangle" },
+    		$$inline: true
+    	});
+
+    	return {
+    		c: function create() {
+    			feather.$$.fragment.c();
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(feather, target, anchor);
+    			current = true;
+    		},
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(feather.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(feather.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(feather, detaching);
+    		}
+    	};
+    }
+
+    // (87:4) {#if ws.readyState === 1}
+    function create_if_block_3(ctx) {
+    	var current;
+
+    	var feather = new Feather({ props: { icon: "zap" }, $$inline: true });
+
+    	return {
+    		c: function create() {
+    			feather.$$.fragment.c();
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(feather, target, anchor);
+    			current = true;
+    		},
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(feather.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(feather.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(feather, detaching);
+    		}
+    	};
+    }
+
+    // (92:45) {:else}
+    function create_else_block(ctx) {
+    	var current;
+
+    	var feather = new Feather({
+    		props: { icon: "alert-triangle" },
+    		$$inline: true
+    	});
+
+    	return {
+    		c: function create() {
+    			feather.$$.fragment.c();
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(feather, target, anchor);
+    			current = true;
+    		},
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(feather.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(feather.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(feather, detaching);
+    		}
+    	};
+    }
+
+    // (92:4) {#if atem.connected}
+    function create_if_block_2(ctx) {
+    	var current;
+
+    	var feather = new Feather({ props: { icon: "zap" }, $$inline: true });
+
+    	return {
+    		c: function create() {
+    			feather.$$.fragment.c();
+    		},
+
+    		m: function mount(target, anchor) {
+    			mount_component(feather, target, anchor);
+    			current = true;
+    		},
+
+    		i: function intro(local) {
+    			if (current) return;
+    			transition_in(feather.$$.fragment, local);
+
+    			current = true;
+    		},
+
+    		o: function outro(local) {
+    			transition_out(feather.$$.fragment, local);
+    			current = false;
+    		},
+
+    		d: function destroy(detaching) {
+    			destroy_component(feather, detaching);
+    		}
+    	};
+    }
+
+    // (101:6) {#each atem.state.visibleChannels as channel}
     function create_each_block_1(ctx) {
     	var div, p, t0_value = ctx.channel.label, t0, t1, dispose;
 
@@ -3259,11 +3383,11 @@ var app = (function () {
     			p = element("p");
     			t0 = text(t0_value);
     			t1 = space();
-    			add_location(p, file, 118, 10, 3442);
+    			add_location(p, file, 106, 10, 3274);
     			attr(div, "class", "button");
     			toggle_class(div, "red", ctx.atem.isProgramChannel(ctx.channel));
     			toggle_class(div, "green", ctx.atem.isPreviewChannel(ctx.channel));
-    			add_location(div, file, 113, 8, 3239);
+    			add_location(div, file, 101, 8, 3071);
     			dispose = listen(div, "click", click_handler);
     		},
 
@@ -3296,7 +3420,7 @@ var app = (function () {
     	};
     }
 
-    // (192:6) {#if atem.state.topology.numberOfStingers > 0}
+    // (178:6) {#if atem.state.topology.numberOfStingers > 0}
     function create_if_block_1(ctx) {
     	var div, p, dispose;
 
@@ -3309,10 +3433,10 @@ var app = (function () {
     			div = element("div");
     			p = element("p");
     			p.textContent = "STING";
-    			add_location(p, file, 196, 10, 5746);
+    			add_location(p, file, 182, 10, 5555);
     			attr(div, "class", "button");
     			toggle_class(div, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 3);
-    			add_location(div, file, 192, 8, 5581);
+    			add_location(div, file, 178, 8, 5390);
     			dispose = listen(div, "click", click_handler_7);
     		},
 
@@ -3338,7 +3462,7 @@ var app = (function () {
     	};
     }
 
-    // (200:6) {#if atem.state.topology.numberOfDVEs > 0}
+    // (186:6) {#if atem.state.topology.numberOfDVEs > 0}
     function create_if_block(ctx) {
     	var div, p, dispose;
 
@@ -3351,10 +3475,10 @@ var app = (function () {
     			div = element("div");
     			p = element("p");
     			p.textContent = "DVE";
-    			add_location(p, file, 204, 10, 6008);
+    			add_location(p, file, 190, 10, 5817);
     			attr(div, "class", "button");
     			toggle_class(div, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 4);
-    			add_location(div, file, 200, 8, 5843);
+    			add_location(div, file, 186, 8, 5652);
     			dispose = listen(div, "click", click_handler_8);
     		},
 
@@ -3380,25 +3504,43 @@ var app = (function () {
     	};
     }
 
-    // (99:0) {#each switchers as atem}
+    // (80:0) {#each switchers as atem}
     function create_each_block(ctx) {
-    	var header, h1, t0_value = ctx.atem.state._pin, t0, t1, a0, t2, t3, a1, t4, t5, a2, t6, t7, a3, t8, t9, a4, t10, t11, div23, section0, h20, t13, div0, t14, section1, h21, t16, div3, div1, p0, t18, div2, p1, t20, input0, t21, section2, h22, t23, div7, div4, p2, t25, div5, p3, t26, br0, t27, t28, div6, p4, t30, section3, h23, t32, div12, div8, p5, t34, div9, p6, t36, div10, p7, t38, t39, t40, div11, p8, t41, br1, t42, t43, section4, h24, t45, div16, div13, p9, t47, div14, p10, t48, br2, t49, t50, div15, p11, t52, section5, h25, t54, div20, div17, p12, t56, div18, p13, t57, br3, t58, t59, div19, p14, t61, section6, h26, t63, div22, div21, p15, t65, div26, div24, img0, t66, input1, t67, div25, img1, t68, input2, t69, current, dispose;
+    	var header, h1, t0_value = ctx.atem.state._pin, t0, t1, a0, t2, t3, a1, t4, t5, span0, current_block_type_index, if_block0, t6, t7, span1, current_block_type_index_1, if_block1, t8, t9, div23, section0, h30, t11, div0, t12, section1, h31, t14, div3, div1, p0, t16, div2, p1, t18, input0, t19, section2, h32, t21, div7, div4, p2, t23, div5, p3, t24, br0, t25, t26, div6, p4, t28, section3, h33, t30, div12, div8, p5, t32, div9, p6, t34, div10, p7, t36, t37, t38, div11, p8, t39, br1, t40, t41, section4, h34, t43, div16, div13, p9, t45, div14, p10, t46, br2, t47, t48, div15, p11, t50, section5, h35, t52, div20, div17, p12, t54, div18, p13, t55, br3, t56, t57, div19, p14, t59, section6, h36, t61, div22, div21, p15, t63, div26, h2, t65, div24, img0, t66, input1, t67, div25, img1, t68, input2, t69, current, dispose;
 
     	var feather0 = new Feather({ props: { icon: "grid" }, $$inline: true });
 
     	var feather1 = new Feather({ props: { icon: "film" }, $$inline: true });
 
-    	var feather2 = new Feather({
-    		props: { icon: "sliders" },
-    		$$inline: true
-    	});
+    	var if_block_creators = [
+    		create_if_block_3,
+    		create_else_block_1
+    	];
 
-    	var feather3 = new Feather({ props: { icon: "video" }, $$inline: true });
+    	var if_blocks = [];
 
-    	var feather4 = new Feather({
-    		props: { icon: "settings" },
-    		$$inline: true
-    	});
+    	function select_block_type(ctx) {
+    		if (ctx.ws.readyState === 1) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index = select_block_type(ctx);
+    	if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+
+    	var if_block_creators_1 = [
+    		create_if_block_2,
+    		create_else_block
+    	];
+
+    	var if_blocks_1 = [];
+
+    	function select_block_type_1(ctx) {
+    		if (ctx.atem.connected) return 0;
+    		return 1;
+    	}
+
+    	current_block_type_index_1 = select_block_type_1(ctx);
+    	if_block1 = if_blocks_1[current_block_type_index_1] = if_block_creators_1[current_block_type_index_1](ctx);
 
     	var each_value_1 = ctx.atem.state.visibleChannels;
 
@@ -3440,9 +3582,9 @@ var app = (function () {
     		return ctx.click_handler_6(ctx, ...args);
     	}
 
-    	var if_block0 = (ctx.atem.state.topology.numberOfStingers > 0) && create_if_block_1(ctx);
+    	var if_block2 = (ctx.atem.state.topology.numberOfStingers > 0) && create_if_block_1(ctx);
 
-    	var if_block1 = (ctx.atem.state.topology.numberOfDVEs > 0) && create_if_block(ctx);
+    	var if_block3 = (ctx.atem.state.topology.numberOfDVEs > 0) && create_if_block(ctx);
 
     	function click_handler_9(...args) {
     		return ctx.click_handler_9(ctx, ...args);
@@ -3468,6 +3610,22 @@ var app = (function () {
     		return ctx.click_handler_14(ctx, ...args);
     	}
 
+    	function change_handler(...args) {
+    		return ctx.change_handler(ctx, ...args);
+    	}
+
+    	function drop_handler(...args) {
+    		return ctx.drop_handler(ctx, ...args);
+    	}
+
+    	function change_handler_1(...args) {
+    		return ctx.change_handler_1(ctx, ...args);
+    	}
+
+    	function drop_handler_1(...args) {
+    		return ctx.drop_handler_1(ctx, ...args);
+    	}
+
     	return {
     		c: function create() {
     			header = element("header");
@@ -3482,139 +3640,138 @@ var app = (function () {
     			feather1.$$.fragment.c();
     			t4 = text("Media");
     			t5 = space();
-    			a2 = element("a");
-    			feather2.$$.fragment.c();
-    			t6 = text("Audio");
+    			span0 = element("span");
+    			if_block0.c();
+    			t6 = text("\n    Server");
     			t7 = space();
-    			a3 = element("a");
-    			feather3.$$.fragment.c();
-    			t8 = text("Camera");
+    			span1 = element("span");
+    			if_block1.c();
+    			t8 = text("\n    ATEM");
     			t9 = space();
-    			a4 = element("a");
-    			feather4.$$.fragment.c();
-    			t10 = text("Settings");
-    			t11 = space();
     			div23 = element("div");
     			section0 = element("section");
-    			h20 = element("h2");
-    			h20.textContent = "Program & Preview";
-    			t13 = space();
+    			h30 = element("h3");
+    			h30.textContent = "Program & Preview";
+    			t11 = space();
     			div0 = element("div");
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].c();
     			}
 
-    			t14 = space();
+    			t12 = space();
     			section1 = element("section");
-    			h21 = element("h2");
-    			h21.textContent = "Transition";
-    			t16 = space();
+    			h31 = element("h3");
+    			h31.textContent = "Transition";
+    			t14 = space();
     			div3 = element("div");
     			div1 = element("div");
     			p0 = element("p");
     			p0.textContent = "CUT";
-    			t18 = space();
+    			t16 = space();
     			div2 = element("div");
     			p1 = element("p");
     			p1.textContent = "AUTO";
-    			t20 = space();
+    			t18 = space();
     			input0 = element("input");
-    			t21 = space();
+    			t19 = space();
     			section2 = element("section");
-    			h22 = element("h2");
-    			h22.textContent = "Next Transition";
-    			t23 = space();
+    			h32 = element("h3");
+    			h32.textContent = "Next Transition";
+    			t21 = space();
     			div7 = element("div");
     			div4 = element("div");
     			p2 = element("p");
     			p2.textContent = "BKGD";
-    			t25 = space();
+    			t23 = space();
     			div5 = element("div");
     			p3 = element("p");
-    			t26 = text("ON");
+    			t24 = text("ON");
     			br0 = element("br");
-    			t27 = text("AIR");
-    			t28 = space();
+    			t25 = text("AIR");
+    			t26 = space();
     			div6 = element("div");
     			p4 = element("p");
     			p4.textContent = "Key 1";
-    			t30 = space();
+    			t28 = space();
     			section3 = element("section");
-    			h23 = element("h2");
-    			h23.textContent = "Transition style";
-    			t32 = space();
+    			h33 = element("h3");
+    			h33.textContent = "Transition style";
+    			t30 = space();
     			div12 = element("div");
     			div8 = element("div");
     			p5 = element("p");
     			p5.textContent = "MIX";
-    			t34 = space();
+    			t32 = space();
     			div9 = element("div");
     			p6 = element("p");
     			p6.textContent = "DIP";
-    			t36 = space();
+    			t34 = space();
     			div10 = element("div");
     			p7 = element("p");
     			p7.textContent = "WIPE";
+    			t36 = space();
+    			if (if_block2) if_block2.c();
+    			t37 = space();
+    			if (if_block3) if_block3.c();
     			t38 = space();
-    			if (if_block0) if_block0.c();
-    			t39 = space();
-    			if (if_block1) if_block1.c();
-    			t40 = space();
     			div11 = element("div");
     			p8 = element("p");
-    			t41 = text("PREV");
+    			t39 = text("PREV");
     			br1 = element("br");
-    			t42 = text("TRAN");
-    			t43 = space();
+    			t40 = text("TRAN");
+    			t41 = space();
     			section4 = element("section");
-    			h24 = element("h2");
-    			h24.textContent = "Downstream Key 1";
-    			t45 = space();
+    			h34 = element("h3");
+    			h34.textContent = "Downstream Key 1";
+    			t43 = space();
     			div16 = element("div");
     			div13 = element("div");
     			p9 = element("p");
     			p9.textContent = "TIE";
-    			t47 = space();
+    			t45 = space();
     			div14 = element("div");
     			p10 = element("p");
-    			t48 = text("ON");
+    			t46 = text("ON");
     			br2 = element("br");
-    			t49 = text("AIR");
-    			t50 = space();
+    			t47 = text("AIR");
+    			t48 = space();
     			div15 = element("div");
     			p11 = element("p");
     			p11.textContent = "AUTO";
-    			t52 = space();
+    			t50 = space();
     			section5 = element("section");
-    			h25 = element("h2");
-    			h25.textContent = "Downstream Key 2";
-    			t54 = space();
+    			h35 = element("h3");
+    			h35.textContent = "Downstream Key 2";
+    			t52 = space();
     			div20 = element("div");
     			div17 = element("div");
     			p12 = element("p");
     			p12.textContent = "TIE";
-    			t56 = space();
+    			t54 = space();
     			div18 = element("div");
     			p13 = element("p");
-    			t57 = text("ON");
+    			t55 = text("ON");
     			br3 = element("br");
-    			t58 = text("AIR");
-    			t59 = space();
+    			t56 = text("AIR");
+    			t57 = space();
     			div19 = element("div");
     			p14 = element("p");
     			p14.textContent = "AUTO";
-    			t61 = space();
+    			t59 = space();
     			section6 = element("section");
-    			h26 = element("h2");
-    			h26.textContent = "Fade to Black";
-    			t63 = space();
+    			h36 = element("h3");
+    			h36.textContent = "Fade to Black";
+    			t61 = space();
     			div22 = element("div");
     			div21 = element("div");
     			p15 = element("p");
     			p15.textContent = "FTB";
-    			t65 = space();
+    			t63 = space();
     			div26 = element("div");
+    			h2 = element("h2");
+    			h2.textContent = "Media";
+    			t65 = space();
     			div24 = element("div");
     			img0 = element("img");
     			t66 = space();
@@ -3625,156 +3782,150 @@ var app = (function () {
     			t68 = space();
     			input2 = element("input");
     			t69 = space();
-    			add_location(h1, file, 100, 2, 2670);
+    			add_location(h1, file, 81, 2, 2211);
     			attr(a0, "href", "#switcher");
     			attr(a0, "class", "tab");
-    			add_location(a0, file, 101, 2, 2699);
+    			add_location(a0, file, 82, 2, 2240);
     			attr(a1, "href", "#media");
     			attr(a1, "class", "tab");
-    			add_location(a1, file, 102, 2, 2768);
-    			attr(a2, "href", "#audio");
-    			attr(a2, "class", "tab");
-    			add_location(a2, file, 103, 2, 2831);
-    			attr(a3, "href", "#camera");
-    			attr(a3, "class", "tab");
-    			add_location(a3, file, 104, 2, 2897);
-    			attr(a4, "href", "#settings");
-    			attr(a4, "class", "tab");
-    			add_location(a4, file, 105, 2, 2963);
-    			add_location(header, file, 99, 0, 2659);
-    			attr(h20, "class", "section");
-    			add_location(h20, file, 110, 4, 3113);
+    			add_location(a1, file, 83, 2, 2309);
+    			attr(span0, "class", "tab connection-status");
+    			attr(span0, "title", "Connection status: green=connected, red=disconnected");
+    			toggle_class(span0, "connected", ctx.ws.readyState === 1);
+    			add_location(span0, file, 84, 2, 2372);
+    			attr(span1, "class", "tab connection-status");
+    			attr(span1, "title", "Connection status: green=connected, red=disconnected");
+    			toggle_class(span1, "connected", ctx.atem.connected);
+    			add_location(span1, file, 89, 2, 2634);
+    			add_location(header, file, 80, 0, 2200);
+    			add_location(h30, file, 98, 4, 2961);
     			attr(div0, "class", "well");
-    			add_location(div0, file, 111, 4, 3160);
+    			add_location(div0, file, 99, 4, 2992);
     			attr(section0, "class", "channels");
-    			add_location(section0, file, 109, 2, 3082);
-    			attr(h21, "class", "section");
-    			add_location(h21, file, 125, 4, 3554);
-    			add_location(p0, file, 128, 8, 3678);
+    			add_location(section0, file, 97, 2, 2930);
+    			add_location(h31, file, 113, 4, 3386);
+    			add_location(p0, file, 116, 8, 3494);
     			attr(div1, "class", "button");
-    			add_location(div1, file, 127, 6, 3619);
-    			add_location(p1, file, 134, 8, 3851);
+    			add_location(div1, file, 115, 6, 3435);
+    			add_location(p1, file, 122, 8, 3666);
     			attr(div2, "class", "button");
-    			toggle_class(div2, "red", ctx.atem.state.video.ME[0].transitionPosition != 0);
-    			add_location(div2, file, 130, 6, 3708);
+    			toggle_class(div2, "red", ctx.atem.state.video.ME[0].transitionPosition > 0);
+    			add_location(div2, file, 118, 6, 3524);
     			attr(input0, "class", "slider");
     			attr(input0, "type", "range");
     			attr(input0, "min", "0");
-    			attr(input0, "max", "100");
-    			add_location(input0, file, 136, 6, 3882);
+    			attr(input0, "max", "1");
+    			attr(input0, "step", "0.001");
+    			add_location(input0, file, 124, 6, 3697);
     			attr(div3, "class", "well");
-    			add_location(div3, file, 126, 4, 3594);
+    			add_location(div3, file, 114, 4, 3410);
     			attr(section1, "class", "transition");
-    			add_location(section1, file, 124, 2, 3521);
-    			attr(h22, "class", "section");
-    			add_location(h22, file, 147, 4, 4164);
-    			add_location(p2, file, 153, 8, 4411);
+    			add_location(section1, file, 112, 2, 3353);
+    			add_location(h32, file, 133, 4, 4005);
+    			add_location(p2, file, 139, 8, 4236);
     			attr(div4, "class", "button");
     			toggle_class(div4, "yellow", ctx.atem.state.video.ME[0].upstreamKeyNextBackgroundState);
-    			add_location(div4, file, 149, 6, 4234);
-    			add_location(br0, file, 159, 13, 4602);
-    			add_location(p3, file, 159, 8, 4597);
+    			add_location(div4, file, 135, 6, 4059);
+    			add_location(br0, file, 145, 13, 4427);
+    			add_location(p3, file, 145, 8, 4422);
     			attr(div5, "class", "button");
     			toggle_class(div5, "red", ctx.atem.state.video.ME[0].upstreamKeyState[0]);
-    			add_location(div5, file, 155, 6, 4442);
-    			add_location(p4, file, 165, 8, 4801);
+    			add_location(div5, file, 141, 6, 4267);
+    			add_location(p4, file, 151, 8, 4626);
     			attr(div6, "class", "button");
     			toggle_class(div6, "yellow", ctx.atem.state.video.ME[0].upstreamKeyNextState[0]);
-    			add_location(div6, file, 161, 6, 4635);
+    			add_location(div6, file, 147, 6, 4460);
     			attr(div7, "class", "well");
-    			add_location(div7, file, 148, 4, 4209);
+    			add_location(div7, file, 134, 4, 4034);
     			attr(section2, "class", "next-transition");
-    			add_location(section2, file, 146, 2, 4126);
-    			attr(h23, "class", "section");
-    			add_location(h23, file, 171, 4, 4893);
-    			add_location(p5, file, 177, 8, 5121);
+    			add_location(section2, file, 132, 2, 3967);
+    			add_location(h33, file, 157, 4, 4718);
+    			add_location(p5, file, 163, 8, 4930);
     			attr(div8, "class", "button");
     			toggle_class(div8, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 0);
-    			add_location(div8, file, 173, 6, 4964);
-    			add_location(p6, file, 183, 8, 5308);
+    			add_location(div8, file, 159, 6, 4773);
+    			add_location(p6, file, 169, 8, 5117);
     			attr(div9, "class", "button");
     			toggle_class(div9, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 1);
-    			add_location(div9, file, 179, 6, 5151);
-    			add_location(p7, file, 189, 8, 5495);
+    			add_location(div9, file, 165, 6, 4960);
+    			add_location(p7, file, 175, 8, 5304);
     			attr(div10, "class", "button");
     			toggle_class(div10, "yellow", ctx.atem.state.video.ME[0].transitionStyle == 2);
-    			add_location(div10, file, 185, 6, 5338);
-    			add_location(br1, file, 208, 15, 6128);
-    			add_location(p8, file, 208, 8, 6121);
+    			add_location(div10, file, 171, 6, 5147);
+    			add_location(br1, file, 194, 15, 5937);
+    			add_location(p8, file, 194, 8, 5930);
     			attr(div11, "class", "button");
-    			add_location(div11, file, 207, 6, 6052);
+    			add_location(div11, file, 193, 6, 5861);
     			attr(div12, "class", "well");
-    			add_location(div12, file, 172, 4, 4939);
+    			add_location(div12, file, 158, 4, 4748);
     			attr(section3, "class", "transition-style");
-    			add_location(section3, file, 170, 2, 4854);
-    			attr(h24, "class", "section");
-    			add_location(h24, file, 214, 4, 6220);
-    			add_location(p9, file, 220, 8, 6443);
+    			add_location(section3, file, 156, 2, 4679);
+    			add_location(h34, file, 200, 4, 6029);
+    			add_location(p9, file, 206, 8, 6236);
     			attr(div13, "class", "button");
     			toggle_class(div13, "yellow", ctx.atem.state.video.downstreamKeyTie[0]);
-    			add_location(div13, file, 216, 6, 6291);
-    			add_location(br2, file, 226, 13, 6625);
-    			add_location(p10, file, 226, 8, 6620);
+    			add_location(div13, file, 202, 6, 6084);
+    			add_location(br2, file, 212, 13, 6418);
+    			add_location(p10, file, 212, 8, 6413);
     			attr(div14, "class", "button");
     			toggle_class(div14, "red", ctx.atem.state.video.downstreamKeyOn[0]);
-    			add_location(div14, file, 222, 6, 6473);
-    			add_location(p11, file, 232, 8, 6771);
+    			add_location(div14, file, 208, 6, 6266);
+    			add_location(p11, file, 218, 8, 6564);
     			attr(div15, "class", "button");
     			toggle_class(div15, "red", false);
-    			add_location(div15, file, 228, 6, 6658);
+    			add_location(div15, file, 214, 6, 6451);
     			attr(div16, "class", "well");
-    			add_location(div16, file, 215, 4, 6266);
+    			add_location(div16, file, 201, 4, 6059);
     			attr(section4, "class", "downstream-key");
-    			add_location(section4, file, 213, 2, 6183);
-    			attr(h25, "class", "section");
-    			add_location(h25, file, 237, 4, 6859);
-    			add_location(p12, file, 243, 8, 7082);
+    			add_location(section4, file, 199, 2, 5992);
+    			add_location(h35, file, 223, 4, 6652);
+    			add_location(p12, file, 229, 8, 6859);
     			attr(div17, "class", "button");
     			toggle_class(div17, "yellow", ctx.atem.state.video.downstreamKeyTie[1]);
-    			add_location(div17, file, 239, 6, 6930);
-    			add_location(br3, file, 249, 13, 7264);
-    			add_location(p13, file, 249, 8, 7259);
+    			add_location(div17, file, 225, 6, 6707);
+    			add_location(br3, file, 235, 13, 7041);
+    			add_location(p13, file, 235, 8, 7036);
     			attr(div18, "class", "button");
     			toggle_class(div18, "red", ctx.atem.state.video.downstreamKeyOn[1]);
-    			add_location(div18, file, 245, 6, 7112);
-    			add_location(p14, file, 255, 8, 7410);
+    			add_location(div18, file, 231, 6, 6889);
+    			add_location(p14, file, 241, 8, 7187);
     			attr(div19, "class", "button");
     			toggle_class(div19, "red", false);
-    			add_location(div19, file, 251, 6, 7297);
+    			add_location(div19, file, 237, 6, 7074);
     			attr(div20, "class", "well");
-    			add_location(div20, file, 238, 4, 6905);
+    			add_location(div20, file, 224, 4, 6682);
     			attr(section5, "class", "downstream-key");
-    			add_location(section5, file, 236, 2, 6822);
-    			attr(h26, "class", "section");
-    			add_location(h26, file, 261, 4, 7498);
-    			add_location(p15, file, 267, 8, 7694);
+    			add_location(section5, file, 222, 2, 6615);
+    			add_location(h36, file, 247, 4, 7275);
+    			add_location(p15, file, 253, 8, 7455);
     			attr(div21, "class", "button");
     			toggle_class(div21, "red", ctx.atem.state.video.ME[0].fadeToBlack);
-    			add_location(div21, file, 263, 6, 7566);
+    			add_location(div21, file, 249, 6, 7327);
     			attr(div22, "class", "well");
-    			add_location(div22, file, 262, 4, 7541);
+    			add_location(div22, file, 248, 4, 7302);
     			attr(section6, "class", "fade-to-black");
-    			add_location(section6, file, 260, 2, 7462);
+    			add_location(section6, file, 246, 2, 7239);
     			attr(div23, "id", "switcher");
     			attr(div23, "class", "screen");
-    			add_location(div23, file, 107, 0, 3044);
-    			attr(img0, "alt", "Media 2");
-    			add_location(img0, file, 277, 4, 7958);
+    			add_location(div23, file, 96, 0, 2893);
+    			add_location(h2, file, 260, 2, 7568);
+    			attr(img0, "alt", "Upload Media 1");
+    			add_location(img0, file, 264, 4, 7746);
     			attr(input1, "type", "file");
     			attr(input1, "name", "media");
-    			add_location(input1, file, 278, 4, 7984);
-    			attr(div24, "class", "media-thumb");
-    			add_location(div24, file, 274, 2, 7807);
-    			attr(img1, "alt", "Media 2");
-    			add_location(img1, file, 283, 4, 8229);
+    			add_location(input1, file, 265, 4, 7779);
+    			attr(div24, "class", "media-thumb well");
+    			add_location(div24, file, 261, 2, 7585);
+    			attr(img1, "alt", "Upload Media 2");
+    			add_location(img1, file, 270, 4, 8043);
     			attr(input2, "type", "file");
     			attr(input2, "name", "media");
-    			add_location(input2, file, 284, 4, 8255);
-    			attr(div25, "class", "media-thumb");
-    			add_location(div25, file, 280, 2, 8078);
+    			add_location(input2, file, 271, 4, 8076);
+    			attr(div25, "class", "media-thumb well");
+    			add_location(div25, file, 267, 2, 7882);
     			attr(div26, "id", "media");
     			attr(div26, "class", "screen");
-    			add_location(div26, file, 273, 0, 7773);
+    			add_location(div26, file, 259, 0, 7534);
 
     			dispose = [
     				listen(div1, "click", ctx.atem.cutTransition),
@@ -3796,11 +3947,11 @@ var app = (function () {
     				listen(div18, "click", click_handler_13),
     				listen(div19, "click", click_handler_14),
     				listen(div21, "click", ctx.atem.fadeToBlack),
-    				listen(input1, "change", ctx.change_handler),
-    				listen(div24, "drop", ctx.drop_handler),
+    				listen(input1, "change", change_handler),
+    				listen(div24, "drop", drop_handler),
     				listen(div24, "click", click_handler_15),
-    				listen(input2, "change", ctx.change_handler_1),
-    				listen(div25, "drop", ctx.drop_handler_1),
+    				listen(input2, "change", change_handler_1),
+    				listen(div25, "drop", drop_handler_1),
     				listen(div25, "click", click_handler_16)
     			];
     		},
@@ -3818,123 +3969,121 @@ var app = (function () {
     			mount_component(feather1, a1, null);
     			append(a1, t4);
     			append(header, t5);
-    			append(header, a2);
-    			mount_component(feather2, a2, null);
-    			append(a2, t6);
+    			append(header, span0);
+    			if_blocks[current_block_type_index].m(span0, null);
+    			append(span0, t6);
     			append(header, t7);
-    			append(header, a3);
-    			mount_component(feather3, a3, null);
-    			append(a3, t8);
-    			append(header, t9);
-    			append(header, a4);
-    			mount_component(feather4, a4, null);
-    			append(a4, t10);
-    			insert(target, t11, anchor);
+    			append(header, span1);
+    			if_blocks_1[current_block_type_index_1].m(span1, null);
+    			append(span1, t8);
+    			insert(target, t9, anchor);
     			insert(target, div23, anchor);
     			append(div23, section0);
-    			append(section0, h20);
-    			append(section0, t13);
+    			append(section0, h30);
+    			append(section0, t11);
     			append(section0, div0);
 
     			for (var i = 0; i < each_blocks.length; i += 1) {
     				each_blocks[i].m(div0, null);
     			}
 
-    			append(div23, t14);
+    			append(div23, t12);
     			append(div23, section1);
-    			append(section1, h21);
-    			append(section1, t16);
+    			append(section1, h31);
+    			append(section1, t14);
     			append(section1, div3);
     			append(div3, div1);
     			append(div1, p0);
-    			append(div3, t18);
+    			append(div3, t16);
     			append(div3, div2);
     			append(div2, p1);
-    			append(div3, t20);
+    			append(div3, t18);
     			append(div3, input0);
 
     			input0.value = ctx.atem.state.video.ME[0].transitionPosition;
 
-    			append(div23, t21);
+    			append(div23, t19);
     			append(div23, section2);
-    			append(section2, h22);
-    			append(section2, t23);
+    			append(section2, h32);
+    			append(section2, t21);
     			append(section2, div7);
     			append(div7, div4);
     			append(div4, p2);
-    			append(div7, t25);
+    			append(div7, t23);
     			append(div7, div5);
     			append(div5, p3);
-    			append(p3, t26);
+    			append(p3, t24);
     			append(p3, br0);
-    			append(p3, t27);
-    			append(div7, t28);
+    			append(p3, t25);
+    			append(div7, t26);
     			append(div7, div6);
     			append(div6, p4);
-    			append(div23, t30);
+    			append(div23, t28);
     			append(div23, section3);
-    			append(section3, h23);
-    			append(section3, t32);
+    			append(section3, h33);
+    			append(section3, t30);
     			append(section3, div12);
     			append(div12, div8);
     			append(div8, p5);
-    			append(div12, t34);
+    			append(div12, t32);
     			append(div12, div9);
     			append(div9, p6);
-    			append(div12, t36);
+    			append(div12, t34);
     			append(div12, div10);
     			append(div10, p7);
+    			append(div12, t36);
+    			if (if_block2) if_block2.m(div12, null);
+    			append(div12, t37);
+    			if (if_block3) if_block3.m(div12, null);
     			append(div12, t38);
-    			if (if_block0) if_block0.m(div12, null);
-    			append(div12, t39);
-    			if (if_block1) if_block1.m(div12, null);
-    			append(div12, t40);
     			append(div12, div11);
     			append(div11, p8);
-    			append(p8, t41);
+    			append(p8, t39);
     			append(p8, br1);
-    			append(p8, t42);
-    			append(div23, t43);
+    			append(p8, t40);
+    			append(div23, t41);
     			append(div23, section4);
-    			append(section4, h24);
-    			append(section4, t45);
+    			append(section4, h34);
+    			append(section4, t43);
     			append(section4, div16);
     			append(div16, div13);
     			append(div13, p9);
-    			append(div16, t47);
+    			append(div16, t45);
     			append(div16, div14);
     			append(div14, p10);
-    			append(p10, t48);
+    			append(p10, t46);
     			append(p10, br2);
-    			append(p10, t49);
-    			append(div16, t50);
+    			append(p10, t47);
+    			append(div16, t48);
     			append(div16, div15);
     			append(div15, p11);
-    			append(div23, t52);
+    			append(div23, t50);
     			append(div23, section5);
-    			append(section5, h25);
-    			append(section5, t54);
+    			append(section5, h35);
+    			append(section5, t52);
     			append(section5, div20);
     			append(div20, div17);
     			append(div17, p12);
-    			append(div20, t56);
+    			append(div20, t54);
     			append(div20, div18);
     			append(div18, p13);
-    			append(p13, t57);
+    			append(p13, t55);
     			append(p13, br3);
-    			append(p13, t58);
-    			append(div20, t59);
+    			append(p13, t56);
+    			append(div20, t57);
     			append(div20, div19);
     			append(div19, p14);
-    			append(div23, t61);
+    			append(div23, t59);
     			append(div23, section6);
-    			append(section6, h26);
-    			append(section6, t63);
+    			append(section6, h36);
+    			append(section6, t61);
     			append(section6, div22);
     			append(div22, div21);
     			append(div21, p15);
-    			insert(target, t65, anchor);
+    			insert(target, t63, anchor);
     			insert(target, div26, anchor);
+    			append(div26, h2);
+    			append(div26, t65);
     			append(div26, div24);
     			append(div24, img0);
     			append(div24, t66);
@@ -3952,6 +4101,50 @@ var app = (function () {
     			ctx = new_ctx;
     			if ((!current || changed.switchers) && t0_value !== (t0_value = ctx.atem.state._pin)) {
     				set_data(t0, t0_value);
+    			}
+
+    			var previous_block_index = current_block_type_index;
+    			current_block_type_index = select_block_type(ctx);
+    			if (current_block_type_index !== previous_block_index) {
+    				group_outros();
+    				transition_out(if_blocks[previous_block_index], 1, () => {
+    					if_blocks[previous_block_index] = null;
+    				});
+    				check_outros();
+
+    				if_block0 = if_blocks[current_block_type_index];
+    				if (!if_block0) {
+    					if_block0 = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    					if_block0.c();
+    				}
+    				transition_in(if_block0, 1);
+    				if_block0.m(span0, t6);
+    			}
+
+    			if (changed.ws) {
+    				toggle_class(span0, "connected", ctx.ws.readyState === 1);
+    			}
+
+    			var previous_block_index_1 = current_block_type_index_1;
+    			current_block_type_index_1 = select_block_type_1(ctx);
+    			if (current_block_type_index_1 !== previous_block_index_1) {
+    				group_outros();
+    				transition_out(if_blocks_1[previous_block_index_1], 1, () => {
+    					if_blocks_1[previous_block_index_1] = null;
+    				});
+    				check_outros();
+
+    				if_block1 = if_blocks_1[current_block_type_index_1];
+    				if (!if_block1) {
+    					if_block1 = if_blocks_1[current_block_type_index_1] = if_block_creators_1[current_block_type_index_1](ctx);
+    					if_block1.c();
+    				}
+    				transition_in(if_block1, 1);
+    				if_block1.m(span1, t8);
+    			}
+
+    			if (changed.switchers) {
+    				toggle_class(span1, "connected", ctx.atem.connected);
     			}
 
     			if (changed.switchers) {
@@ -3976,7 +4169,7 @@ var app = (function () {
     			}
 
     			if (changed.switchers) {
-    				toggle_class(div2, "red", ctx.atem.state.video.ME[0].transitionPosition != 0);
+    				toggle_class(div2, "red", ctx.atem.state.video.ME[0].transitionPosition > 0);
     			}
 
     			if (changed.switchers) input0.value = ctx.atem.state.video.ME[0].transitionPosition;
@@ -3991,29 +4184,29 @@ var app = (function () {
     			}
 
     			if (ctx.atem.state.topology.numberOfStingers > 0) {
-    				if (if_block0) {
-    					if_block0.p(changed, ctx);
+    				if (if_block2) {
+    					if_block2.p(changed, ctx);
     				} else {
-    					if_block0 = create_if_block_1(ctx);
-    					if_block0.c();
-    					if_block0.m(div12, t39);
+    					if_block2 = create_if_block_1(ctx);
+    					if_block2.c();
+    					if_block2.m(div12, t37);
     				}
-    			} else if (if_block0) {
-    				if_block0.d(1);
-    				if_block0 = null;
+    			} else if (if_block2) {
+    				if_block2.d(1);
+    				if_block2 = null;
     			}
 
     			if (ctx.atem.state.topology.numberOfDVEs > 0) {
-    				if (if_block1) {
-    					if_block1.p(changed, ctx);
+    				if (if_block3) {
+    					if_block3.p(changed, ctx);
     				} else {
-    					if_block1 = create_if_block(ctx);
-    					if_block1.c();
-    					if_block1.m(div12, t40);
+    					if_block3 = create_if_block(ctx);
+    					if_block3.c();
+    					if_block3.m(div12, t38);
     				}
-    			} else if (if_block1) {
-    				if_block1.d(1);
-    				if_block1 = null;
+    			} else if (if_block3) {
+    				if_block3.d(1);
+    				if_block3 = null;
     			}
 
     			if (changed.switchers) {
@@ -4031,21 +4224,16 @@ var app = (function () {
 
     			transition_in(feather1.$$.fragment, local);
 
-    			transition_in(feather2.$$.fragment, local);
-
-    			transition_in(feather3.$$.fragment, local);
-
-    			transition_in(feather4.$$.fragment, local);
-
+    			transition_in(if_block0);
+    			transition_in(if_block1);
     			current = true;
     		},
 
     		o: function outro(local) {
     			transition_out(feather0.$$.fragment, local);
     			transition_out(feather1.$$.fragment, local);
-    			transition_out(feather2.$$.fragment, local);
-    			transition_out(feather3.$$.fragment, local);
-    			transition_out(feather4.$$.fragment, local);
+    			transition_out(if_block0);
+    			transition_out(if_block1);
     			current = false;
     		},
 
@@ -4058,24 +4246,21 @@ var app = (function () {
 
     			destroy_component(feather1, );
 
-    			destroy_component(feather2, );
-
-    			destroy_component(feather3, );
-
-    			destroy_component(feather4, );
+    			if_blocks[current_block_type_index].d();
+    			if_blocks_1[current_block_type_index_1].d();
 
     			if (detaching) {
-    				detach(t11);
+    				detach(t9);
     				detach(div23);
     			}
 
     			destroy_each(each_blocks, detaching);
 
-    			if (if_block0) if_block0.d();
-    			if (if_block1) if_block1.d();
+    			if (if_block2) if_block2.d();
+    			if (if_block3) if_block3.d();
 
     			if (detaching) {
-    				detach(t65);
+    				detach(t63);
     				detach(div26);
     			}
 
@@ -4122,7 +4307,7 @@ var app = (function () {
     		},
 
     		p: function update(changed, ctx) {
-    			if (changed.switchers) {
+    			if (changed.switchers || changed.ws) {
     				each_value = ctx.switchers;
 
     				for (var i = 0; i < each_value.length; i += 1) {
@@ -4169,29 +4354,6 @@ var app = (function () {
     	};
     }
 
-    function uploadMediaFile(file, number) {
-      let img, reader;
-      if (file.type.match(/image.*/)) {
-        img = document.querySelectorAll('.media-thumb img')[number-1];
-        reader = new FileReader();
-        reader.onload = function(e) {
-          img.onload = function() {
-            let canvas, ctx;
-            canvas = document.createElement("canvas");
-            canvas.width = 1280;
-            canvas.height = 720;
-            ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0, 1280, 720);
-            // upload canvas.toDataURL("image/png")
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
-      } else {
-        alert('This file is note an image.');
-      }
-    }
-
     function click_handler_15(e) {
     	return this.querySelector('input').click();
     }
@@ -4209,33 +4371,40 @@ var app = (function () {
       let intervalID = 0;
 
       function doConnect() {
-        ws = new WebSocket("ws://localhost:8080/ws");
+        console.debug("Opening websocket...");
+        $$invalidate('ws', ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws"));
         ws.addEventListener("open", function(event) {
-          console.log("websocket opened");
-          clearInterval(intervalID);
-          intervalID = 0;
+          console.log("Websocket opened");
+          intervalID = clearTimeout(intervalID);
           switchers[0] = new atem_1(); $$invalidate('switchers', switchers);
-          for (let atem of switchers) {
-            atem.websocket = ws;
-          }
+          switchers[0].setWebsocket(ws);
+          // update svelte
+          $$invalidate('ws', ws);
         });
         ws.addEventListener("message", function(event) {
           let data = JSON.parse(event.data);
-          console.log(data);
-          const atem = switchers[data.device || 0];
-          atem.state = data;
+          // console.log(data);
+          switch (data.method) {
+            case 'connect':
+              switchers[data.device || 0].connected = true; $$invalidate('switchers', switchers);
+            break;
+            case 'disconnect':
+              switchers[data.device || 0].connected = false; $$invalidate('switchers', switchers);
+            break;
+            default:
+              if (data.connected) {
+                switchers[data.device || 0].state = data; $$invalidate('switchers', switchers);
+              }
+          }
           return data;
         });
-        ws.addEventListener("error", function(evt) {
-          if (!intervalID) {
-            intervalID = setTimeout(doConnect, 5000);
-          }
+        ws.addEventListener("error", function() {
+          console.log("Websocket error");
+          intervalID = setTimeout(doConnect, 1000);
         });
-        ws.addEventListener("close", function(event) {
-          console.log("websocket closed");
-          if (!intervalID) {
-            intervalID = setTimeout(doConnect, 5000);
-          }
+        ws.addEventListener("close", function() {
+          console.log("Websocket closed");
+          intervalID = setTimeout(doConnect, 1000);
         });
       }
 
@@ -4270,7 +4439,7 @@ var app = (function () {
     	}
 
     	function input_handler({ atem }, e) {
-    		return atem.changeTransitionPosition(this.value);
+    		return atem.changeTransitionPosition(atem.state.video.ME[0].transitionPosition);
     	}
 
     	function click_handler_1({ atem }, e) {
@@ -4306,47 +4475,48 @@ var app = (function () {
     	}
 
     	function click_handler_9({ atem }, e) {
-    		return atem.toggleDownstreamKeyTie(1);
+    		return atem.toggleDownstreamKeyTie(0);
     	}
 
     	function click_handler_10({ atem }, e) {
-    		return atem.toggleDownstreamKeyOn(1);
+    		return atem.toggleDownstreamKeyOn(0);
     	}
 
     	function click_handler_11({ atem }, e) {
-    		return atem.autoDownstreamKey(1);
+    		return atem.autoDownstreamKey(0);
     	}
 
     	function click_handler_12({ atem }, e) {
-    		return atem.toggleDownstreamKeyTie(2);
+    		return atem.toggleDownstreamKeyTie(1);
     	}
 
     	function click_handler_13({ atem }, e) {
-    		return atem.toggleDownstreamKeyOn(2);
+    		return atem.toggleDownstreamKeyOn(1);
     	}
 
     	function click_handler_14({ atem }, e) {
-    		return atem.autoDownstreamKey(2);
+    		return atem.autoDownstreamKey(1);
     	}
 
-    	function change_handler(e) {
-    		return uploadMediaFile(this.files[0], 1);
+    	function change_handler({ atem }, e) {
+    		return atem.uploadMediaFile(e.target.files[0], 0);
     	}
 
-    	function drop_handler(e) {
-    		return uploadMediaFile(e.dataTransfer.files[0], 1);
+    	function drop_handler({ atem }, e) {
+    		return atem.uploadMediaFile(e.dataTransfer.files[0], 1);
     	}
 
-    	function change_handler_1(e) {
-    		return uploadMediaFile(this.files[0], 2);
+    	function change_handler_1({ atem }, e) {
+    		return atem.uploadMediaFile(e.target.files[0], 1);
     	}
 
-    	function drop_handler_1(e) {
-    		return uploadMediaFile(e.dataTransfer.files[0], 2);
+    	function drop_handler_1({ atem }, e) {
+    		return atem.uploadMediaFile(e.dataTransfer.files[0], 2);
     	}
 
     	return {
     		switchers,
+    		ws,
     		click_handler,
     		input0_change_input_handler,
     		input_handler,

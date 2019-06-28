@@ -1,7 +1,9 @@
 const express    = require('express');
 const fileUpload = require('express-fileupload');
-const ATEM       = require('applest-atem');
+const ATEM = require('applest-atem');
+const FileUploader = ATEM.FileUploader
 const config     = require('../config.json');
+const fs         = require('fs');
 
 const app = express();
 var expressWs = require('express-ws')(app);
@@ -13,6 +15,7 @@ let CLIENTS = expressWs.getWss().clients;
 
 let device = 0;
 for (var switcher of config.switchers) {
+  console.log('Initializing switcher', switcher.addr, switcher.port)
   atem = new ATEM;
   atem.event.setMaxListeners(5);
   atem.connect(switcher.addr, switcher.port);
@@ -20,8 +23,22 @@ for (var switcher of config.switchers) {
   switchers.push(atem);
 
   atem.on('stateChanged', (err, state) => {
+    // console.log('atem stateChanged')
     for (var client of CLIENTS) {
-      client.send(JSON.stringify({ switchers: [state] }));
+      client.send(JSON.stringify(state));
+    }
+  })
+
+  atem.on('connect', (err) => {
+    console.log('atem connected');
+    atem.connected = true;
+  })
+
+  atem.on('disconnect', (err) => {
+    console.log('atem disconnected');
+    atem.connected = false;
+    for (var client of CLIENTS) {
+      client.send(JSON.stringify({device: atem.device, method: 'disconnect'}));
     }
   })
 
@@ -51,17 +68,18 @@ app.ws('/ws', function(ws, req) {
   console.log(ip, 'connected');
   // initialize client with all switchers
   for (var atem of switchers) {
-    client.send(JSON.stringify(atem.state));
+    ws.send(JSON.stringify(atem.state));
   }
 
   ws.on('message', function incoming(message) {
     /* JSON-RPC v2 compatible call */
-    console.log(message);
+    console.log(message.slice(0, 500));
     const data = JSON.parse(message);
+    const method = data.method;
     const params = data.params;
     const atem = switchers[params.device || 0];
 
-    switch (data.method) {
+    switch (method) {
       case 'changePreviewInput':
       case 'changeProgramInput':
         atem[method](params.input);
@@ -73,6 +91,8 @@ app.ws('/ws', function(ws, req) {
       break;
       case 'changeUpstreamKeyState':
       case 'changeUpstreamKeyNextState':
+        atem[method](params.number, params.state);
+      break;
       case 'changeDownstreamKeyOn':
       case 'changeDownstreamKeyTie':
         atem[method](params.number, params.state);
@@ -92,8 +112,19 @@ app.ws('/ws', function(ws, req) {
       case 'autoDownstreamKey':
         atem[method](params.number);
       break;
+      case 'uploadMedia':
+        let matches = params.media.match(/^data:(\w+\/\w+);base64,(.*)$/);
+        if (matches[1] == 'image/png') {
+          const buffer = Buffer.from(matches[2], 'base64');
+          // fs.writeFileSync('media'+number+'.png', buffer);
+          const fileUploader = new FileUploader(atem);
+          fileUploader.uploadFromPNGBuffer(buffer, params.number);
+        } else {
+          console.error('Uploaded image is not png');
+        }
+      break;
     }
   });
 });
 
-app.listen(8080);
+app.listen(config.server.port, config.server.host);

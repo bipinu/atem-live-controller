@@ -7,39 +7,42 @@
 
   let ws;
   let intervalID = 0;
-  let socketIsOpen = false;
 
   function doConnect() {
-    ws = new WebSocket("ws://localhost:8080/ws");
+    console.debug("Opening websocket...");
+    ws = new WebSocket(((window.location.protocol === "https:") ? "wss://" : "ws://") + window.location.host + "/ws");
     ws.addEventListener("open", function(event) {
-      console.log("websocket opened");
-      socketIsOpen = true;
-      clearInterval(intervalID);
-      intervalID = 0;
+      console.log("Websocket opened");
+      intervalID = clearTimeout(intervalID);
       switchers[0] = new ATEM();
-      for (let atem of switchers) {
-        atem.websocket = ws;
-      }
+      switchers[0].setWebsocket(ws);
+      // update svelte
+      ws = ws;
     });
     ws.addEventListener("message", function(event) {
       let data = JSON.parse(event.data);
-      console.log(data);
-      const atem = switchers[data.device || 0];
-      atem.state = data;
+      // console.log(data);
+      switch (data.method) {
+        case 'connect':
+          switchers[data.device || 0].connected = true;
+        break;
+        case 'disconnect':
+          switchers[data.device || 0].connected = false;
+        break;
+        default:
+          if (data.connected) {
+            switchers[data.device || 0].state = data;
+          }
+      }
       return data;
     });
-    ws.addEventListener("error", function(evt) {
-      socketIsOpen = false;
-      if (!intervalID) {
-        intervalID = setTimeout(doConnect, 5000);
-      }
+    ws.addEventListener("error", function() {
+      console.log("Websocket error");
+      intervalID = setTimeout(doConnect, 1000);
     });
-    ws.addEventListener("close", function(event) {
-      console.log("websocket closed");
-      socketIsOpen = false;
-      if (!intervalID) {
-        intervalID = setTimeout(doConnect, 5000);
-      }
+    ws.addEventListener("close", function() {
+      console.log("Websocket closed");
+      intervalID = setTimeout(doConnect, 1000);
     });
   }
 
@@ -65,35 +68,13 @@
   });
 
   function sendMessage(data) {
-    if (socketIsOpen) {
+    if (ws.readyState = WebSocket.OPEN) {
       ws.send(JSON.stringify(data));
     } else {
       console.log("sendMessage failed: Websocket not connected");
     }
   }
 
-  function uploadMediaFile(file, number) {
-    let img, reader;
-    if (file.type.match(/image.*/)) {
-      img = document.querySelectorAll('.media-thumb img')[number-1];
-      reader = new FileReader();
-      reader.onload = function(e) {
-        img.onload = function() {
-          let canvas, ctx;
-          canvas = document.createElement("canvas");
-          canvas.width = 1280
-          canvas.height = 720
-          ctx = canvas.getContext("2d");
-          ctx.drawImage(img, 0, 0, 1280, 720);
-          // upload canvas.toDataURL("image/png")
-        }
-        img.src = e.target.result;
-      }
-      reader.readAsDataURL(file);
-    } else {
-      alert('This file is note an image.');
-    }
-  }
 </script>
 
 {#each switchers as atem}
@@ -101,14 +82,21 @@
   <h1>{atem.state._pin}</h1>
   <a href="#switcher" class="tab"><Feather icon="grid"/>Switcher</a>
   <a href="#media" class="tab"><Feather icon="film"/>Media</a>
-  <a href="#audio" class="tab"><Feather icon="sliders"/>Audio</a>
-  <a href="#camera" class="tab"><Feather icon="video"/>Camera</a>
-  <a href="#settings" class="tab"><Feather icon="settings"/>Settings</a>
+  <span class="tab connection-status" class:connected={ws.readyState === 1}
+        title="Connection status: green=connected, red=disconnected">
+    {#if ws.readyState === 1}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
+    Server
+  </span>
+  <span class="tab connection-status" class:connected={atem.connected}
+        title="Connection status: green=connected, red=disconnected">
+    {#if atem.connected}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
+    ATEM
+  </span>
 </header>
-<div id="switcher" class="screen">
 
+<div id="switcher" class="screen">
   <section class="channels">
-    <h2 class="section">Program & Preview</h2>
+    <h3>Program & Preview</h3>
     <div class="well">
       {#each atem.state.visibleChannels as channel}
         <div
@@ -123,29 +111,27 @@
   </section>
 
   <section class="transition">
-    <h2 class="section">Transition</h2>
+    <h3>Transition</h3>
     <div class="well">
       <div class="button" on:click={atem.cutTransition}>
         <p>CUT</p>
       </div>
       <div
         class="button"
-        class:red={atem.state.video.ME[0].transitionPosition != 0}
+        class:red={atem.state.video.ME[0].transitionPosition > 0}
         on:click={atem.autoTransition}>
         <p>AUTO</p>
       </div>
-      <input
-        class="slider"
-        type="range"
-        min="0"
-        max="100"
+      <input class="slider" type="range"
+        min="0" max="1" step="0.001"
         bind:value={atem.state.video.ME[0].transitionPosition}
-        on:input={e => atem.changeTransitionPosition(this.value)} />
+        on:input={e => atem.changeTransitionPosition(atem.state.video.ME[0].transitionPosition)}
+        />
     </div>
   </section>
 
   <section class="next-transition">
-    <h2 class="section">Next Transition</h2>
+    <h3>Next Transition</h3>
     <div class="well">
       <div
         class="button"
@@ -169,7 +155,7 @@
   </section>
 
   <section class="transition-style">
-    <h2 class="section">Transition style</h2>
+    <h3>Transition style</h3>
     <div class="well">
       <div
         class="button"
@@ -212,17 +198,40 @@
   </section>
 
   <section class="downstream-key">
-    <h2 class="section">Downstream Key 1</h2>
+    <h3>Downstream Key 1</h3>
     <div class="well">
       <div
         class="button"
         class:yellow={atem.state.video.downstreamKeyTie[0]}
-        on:click={e => atem.toggleDownstreamKeyTie(1)}>
+        on:click={e => atem.toggleDownstreamKeyTie(0)}>
         <p>TIE</p>
       </div>
       <div
         class="button"
         class:red={atem.state.video.downstreamKeyOn[0]}
+        on:click={e => atem.toggleDownstreamKeyOn(0)}>
+        <p>ON<br />AIR</p>
+      </div>
+      <div
+        class="button"
+        class:red={false}
+        on:click={e => atem.autoDownstreamKey(0)}>
+        <p>AUTO</p>
+      </div>
+    </div>
+  </section>
+  <section class="downstream-key">
+    <h3>Downstream Key 2</h3>
+    <div class="well">
+      <div
+        class="button"
+        class:yellow={atem.state.video.downstreamKeyTie[1]}
+        on:click={e => atem.toggleDownstreamKeyTie(1)}>
+        <p>TIE</p>
+      </div>
+      <div
+        class="button"
+        class:red={atem.state.video.downstreamKeyOn[1]}
         on:click={e => atem.toggleDownstreamKeyOn(1)}>
         <p>ON<br />AIR</p>
       </div>
@@ -234,32 +243,9 @@
       </div>
     </div>
   </section>
-  <section class="downstream-key">
-    <h2 class="section">Downstream Key 2</h2>
-    <div class="well">
-      <div
-        class="button"
-        class:yellow={atem.state.video.downstreamKeyTie[1]}
-        on:click={e => atem.toggleDownstreamKeyTie(2)}>
-        <p>TIE</p>
-      </div>
-      <div
-        class="button"
-        class:red={atem.state.video.downstreamKeyOn[1]}
-        on:click={e => atem.toggleDownstreamKeyOn(2)}>
-        <p>ON<br />AIR</p>
-      </div>
-      <div
-        class="button"
-        class:red={false}
-        on:click={e => atem.autoDownstreamKey(2)}>
-        <p>AUTO</p>
-      </div>
-    </div>
-  </section>
 
   <section class="fade-to-black">
-    <h2 class="section">Fade to Black</h2>
+    <h3>Fade to Black</h3>
     <div class="well">
       <div
         class="button"
@@ -272,17 +258,18 @@
 </div><!-- screen switcher-->
 
 <div id="media" class="screen">
-  <div class="media-thumb"
-       on:drop={e=>uploadMediaFile(e.dataTransfer.files[0], 1)}
+  <h2>Media</h2>
+  <div class="media-thumb well"
+       on:drop={e=>atem.uploadMediaFile(e.dataTransfer.files[0], 1)}
        on:click={e=>this.querySelector('input').click()}>
-    <img alt="Media 2" />
-    <input type="file" name="media" on:change={e=>uploadMediaFile(this.files[0], 1)}/>
+    <img alt="Upload Media 1" />
+    <input type="file" name="media" on:change={e=>atem.uploadMediaFile(e.target.files[0], 0)}/>
   </div>
-  <div class="media-thumb"
-       on:drop={e=>uploadMediaFile(e.dataTransfer.files[0], 2)}
+  <div class="media-thumb well"
+       on:drop={e=>atem.uploadMediaFile(e.dataTransfer.files[0], 2)}
        on:click={e=>this.querySelector('input').click()}>
-    <img alt="Media 2" />
-    <input type="file" name="media" on:change={e=>uploadMediaFile(this.files[0], 2)}/>
+    <img alt="Upload Media 2" />
+    <input type="file" name="media" on:change={e=>atem.uploadMediaFile(e.target.files[0], 1)}/>
   </div>
 </div><!-- screen media-->
 {/each}

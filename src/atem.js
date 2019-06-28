@@ -1,6 +1,14 @@
+/*
+    This class is very similar to node-applest-atem ATEM class
+    but this communicates via websocket to node server
+    These two ATEM classes could be joined in two ways:
+    - constructor decides if it communicates via udp socket to atem or websocket to node
+    - server could relay BMC protocol commands to websocket messages
+*/
+
 class ATEM {
     constructor() {
-        this.state = {
+        this._state = {
             "topology": {
                 "numberOfMEs": 1,
                 "numberOfSources": 18,
@@ -158,7 +166,27 @@ class ATEM {
                 ],
                 "downstreamKeyOn": [false, false],
                 "downstreamKeyTie": [false, false],
-                "auxs": {}
+                "auxs": {},
+                "modes": {
+                    0: '525i59.94 NTSC',
+                    1: '625i 50 PAL',
+                    2: '525i59.94 NTSC 16:9',
+                    3: '625i 50 PAL 16:9',
+                    4: '720p50',
+                    5: '720p59.94',
+                    6: '1080i50',
+                    7: '1080i59.94',
+                    8: '1080p23.98',
+                    9: '1080p24',
+                    10: '1080p25',
+                    11: '1080p29.97',
+                    12: '1080p50',
+                    13: '1080p59.94',
+                    14: '2160p23.98',
+                    15: '2160p24',
+                    16: '2160p25',
+                    17: '2160p29.97',
+                }
             },
             "audio": {
                 "hasMonitor": false,
@@ -224,111 +252,33 @@ class ATEM {
             "_ver0": 2,
             "_ver1": 27,
             "_pin": "ATEM Television Studio",
-            "model": 1,
-            "visibleChannels": [
-                {
-                    "name": "Titulky",
-                    "label": "TIT",
-                    "id": "1",
-                    "device": 0,
-                    "input": "1"
-                },
-                {
-                    "name": "Video PC",
-                    "label": "VID",
-                    "id": "2",
-                    "device": 0,
-                    "input": "2"
-                },
-                {
-                    "name": "Cam 3",
-                    "label": "CAM3",
-                    "id": "3",
-                    "device": 0,
-                    "input": "3"
-                },
-                {
-                    "name": "Cam 4",
-                    "label": "CAM4",
-                    "id": "4",
-                    "device": 0,
-                    "input": "4"
-                },
-                {
-                    "name": "Cam 5",
-                    "label": "CAM5",
-                    "id": "5",
-                    "device": 0,
-                    "input": "5"
-                },
-                {
-                    "name": "Cam 6",
-                    "label": "CAM6",
-                    "id": "6",
-                    "device": 0,
-                    "input": "6"
-                },
-                {
-                    "name": "Black",
-                    "label": "Blk",
-                    "id": "0",
-                    "device": 0,
-                    "input": "0"
-                },
-                {
-                    "name": "Color 1",
-                    "label": "Col1",
-                    "id": "2001",
-                    "device": 0,
-                    "input": "2001"
-                },
-                {
-                    "name": "Color 2",
-                    "label": "Col2",
-                    "id": "2002",
-                    "device": 0,
-                    "input": "2002"
-                },
-                {
-                    "name": "Color Bars",
-                    "label": "Bars",
-                    "id": "1000",
-                    "device": 0,
-                    "input": "1000"
-                },
-                {
-                    "name": "Media 1 Logo",
-                    "label": "LOGO",
-                    "id": "3010",
-                    "device": 0,
-                    "input": "3010"
-                },
-                {
-                    "name": "Media Player 2",
-                    "label": "MP2",
-                    "id": "3020",
-                    "device": 0,
-                    "input": "3020"
-                }
-            ]
+            "model": 1
         }
+        this.updateVisibleChannels();
     }
 
-    getState() {
-        return this.state;
+    get state() {
+        return this._state;
     }
+    set state(state) {
+        this._state = state;
+        this.updateVisibleChannels();
+    }
+
     setWebsocket(websocket) {
         this.websocket = websocket;
     }
 
     sendMessage(data) {
-        const message = JSON.stringify(data);
-        this.websocket.sendMessage(data);
+        if (this.websocket.readyState == WebSocket.OPEN) {
+            const message = JSON.stringify(data);
+            // console.log('sendMessage', message);
+            this.websocket.send(message);
+        } else {
+            console.warn('Websocket is closed. Cannot send message.')
+        }
     }
 
-    updateState(state) {
-        this.updateVisibleChannels()
-    }
     updateVisibleChannels() {
         this.state.visibleChannels = [];
         for (var id in this.state.channels) {
@@ -372,12 +322,12 @@ class ATEM {
     }
 
     isProgramChannel(channel) {
-        return this.state.video.ME[0].programChannel === channel.input;
-    };
+        return this.state.video.ME[0].programInput === parseInt(channel.input);
+    }
 
     isPreviewChannel(channel) {
-        return this.state.video.ME[0].previewChannel === channel.input;
-    };
+        return this.state.video.ME[0].previewInput === parseInt(channel.input);
+    }
 
     changeProgramInput(input) {
         this.sendMessage({ method: 'changeProgramInput', params: { device: this.state.device, input } })
@@ -388,11 +338,11 @@ class ATEM {
     }
 
     changeProgram(channel) {
-        changeProgramInput(this.state.device, channel.input);
+        return this.changeProgramInput(this.state.device, channel.input);
     }
 
     changePreview(channel) {
-        return changePreviewInput(channel.input);
+        return this.changePreviewInput(channel.input);
     };
 
     autoTransition() {
@@ -410,7 +360,7 @@ class ATEM {
 
     changeTransitionPosition(percent) {
         console.assert(percent);
-        this.sendMessage({ method: 'changeTransitionPosition', params: { device: this.state.device, position: parseInt(percent) * 10000 } });
+        this.sendMessage({ method: 'changeTransitionPosition', params: { device: this.state.device, position: parseFloat(percent) * 10000 } });
     }
 
     changeTransitionType(type) {
@@ -428,18 +378,18 @@ class ATEM {
     };
 
     toggleUpstreamKeyState(number) {
-        const status = !this.state.video.ME[0].upstreamKeyState[number];
-        this.sendMessage({ method: 'changeUpstreamKeyState', params: { device: this.state.device, number, status } });
+        const state = !this.state.video.ME[0].upstreamKeyState[number];
+        this.sendMessage({ method: 'changeUpstreamKeyState', params: { device: this.state.device, number, state } });
     };
 
     toggleDownstreamKeyTie(number) {
-        const status = !this.state.video.downstreamKeyTie[number];
-        this.sendMessage({ method: 'changeDownstreamKeyTie', params: { device: this.state.device, number, status } });
+        const state = !this.state.video.downstreamKeyTie[number];
+        this.sendMessage({ method: 'changeDownstreamKeyTie', params: { device: this.state.device, number, state } });
     };
 
     toggleDownstreamKeyOn(number) {
-        const status = !this.state.video.downstreamKeyOn[number];
-        this.sendMessage({ method: 'changeDownstreamKeyOn', params: { device: this.state.device, number, status } });
+        const state = !this.state.video.downstreamKeyOn[number];
+        this.sendMessage({ method: 'changeDownstreamKeyOn', params: { device: this.state.device, number, state } });
     };
 
     autoDownstreamKey(number) {
@@ -448,6 +398,38 @@ class ATEM {
     fadeToBlack() {
         this.sendMessage({ method: 'fadeToBlack', params: { device: this.state.device } });
     }
+
+    uploadMediaFile(file, number) {
+        let img, reader;
+        let atem = this;
+        if (file.type.match(/image.*/)) {
+          img = document.querySelectorAll('.media-thumb img')[number];
+          reader = new FileReader();
+          reader.onload = function(e) {
+            img.onload = function() {
+                let canvas, ctx;
+                canvas = document.createElement("canvas");
+                canvas.width = 1280
+                canvas.height = 720
+                ctx = canvas.getContext("2d");
+                ctx.drawImage(img, 0, 0, 1280, 720);
+                // upload to server
+                atem.sendMessage({
+                    method: "uploadMedia",
+                    params: {
+                        device: atem.state.device,
+                        number: number || 0,
+                        media: canvas.toDataURL("image/png")
+                    }
+                });
+            }
+            img.src = e.target.result;
+          }
+          reader.readAsDataURL(file);
+        } else {
+          alert('This file is not an image.');
+        }
+      }
 }
 
 module.exports = { ATEM };
