@@ -2,12 +2,12 @@
   "name": "atem-live-controller",
   "version": "1.0.0",
   "description": "HTML5 client-server controller for Blackmagic Design ATEM switchers",
-  "main": "src/server.js",
+  "main": "main.js",
   "scripts": {
     "build": "rollup -c",
     "autobuild": "rollup -c -w",
-    "dev": "run-p start autobuild",
-    "start": "node src/server.js"
+    "dev": "run-p start autobuild server",
+    "start": "electron main.js"
   },
   "author": "Filip Hanes <filip.hanes@pm.me>",
   "license": "MIT",
@@ -20,6 +20,7 @@
     "ws": "^7.0.1"
   },
   "devDependencies": {
+    "electron": "^5.0.6",
     "npm-run-all": "^4.1.5",
     "rollup": "^1.16.2",
     "rollup-plugin-commonjs": "^9.3.4",
