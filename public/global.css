@@ -109,7 +109,6 @@ section h3 {
 }
 
 section.transition {
-  flex-grow: 1;
   /* margin: 0 1rem; */
 }
 
@@ -226,6 +225,61 @@ section.transition {
 .slider {
   min-width: 15rem;
   cursor: pointer;
+}
+
+.mix-effect-buttons{
+  break-after: always;
+  margin: 0rem auto;
+}
+/* Gray button */
+.gray-button {
+  background-image: linear-gradient(to bottom, #2e2e2e, #222222);
+  color: #8c8c8c;
+  border: none;
+  border-radius: 1rem;
+  font-size: .8rem;
+  font-weight: 300;
+  line-height: 1.7rem;
+  padding: 0 1.7rem;
+  border-top: 1px solid #3b3b3b;
+  cursor: pointer;
+}
+.gray-button.active {
+  background-image: linear-gradient(to bottom, #222222, #2e2e2e);
+  /* color: orange; */
+  color: #CE6203;
+}
+
+.button-group {
+  box-shadow: 1px 1px 2px black;
+  border: 1px solid black;
+  border-radius: 1rem;
+}
+.button-group.horizontal .gray-button{
+  border-right: 1px solid black;
+  border-radius: 0;
+}
+.button-group.horizontal .gray-button:first-child {
+  border-top-left-radius: 1rem;
+  border-bottom-left-radius: 1rem;
+}
+.button-group.horizontal .gray-button:last-child {
+  border-top-right-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  border-right: none;
+}
+.button-group.vertical .gray-button{
+  border-bottom: 1px solid black;
+  border-radius: 0;
+}
+
+.button-group.vertical .gray-button:first-child {
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+.button-group.vertical .gray-button:last-child {
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
 }
 
 #switcher {

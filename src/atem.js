@@ -1,272 +1,19 @@
 /*
-    This class is very similar to node-applest-atem ATEM class
+    This class is very similar to atem-connection Atem class
     but this communicates via websocket to node server
-    These two ATEM classes could be joined in two ways:
-    - constructor decides if it communicates via udp socket to atem or websocket to node
-    - server could relay BMC protocol commands to websocket messages
 */
+var defaultState = require('./state.default.json');
 
-class ATEM {
+class Atem {
     constructor() {
-        this.state = {
-            "topology": {
-                "numberOfMEs": 1,
-                "numberOfSources": 18,
-                "numberOfColorGenerators": 2,
-                "numberOfAUXs": 0,
-                "numberOfDownstreamKeys": 0,
-                "numberOfStingers": 2,
-                "numberOfDVEs": 0,
-                "numberOfSuperSources": 4
-            },
-            "tallys": [2, 0, 0, 0, 0, 0],
-            "channels": {
-                "0": {
-                    "name": "Black",
-                    "label": "Blk",
-                    "id": "0",
-                    "device": 0,
-                    "input": "0"
-                },
-                "1": {
-                    "name": "Cam 1",
-                    "label": "CAM1",
-                    "id": "1",
-                    "device": 0,
-                    "input": "1"
-                },
-                "2": {
-                    "name": "Cam 2",
-                    "label": "CAM2",
-                    "id": "2",
-                    "device": 0,
-                    "input": "2"
-                },
-                "3": {
-                    "name": "Cam 3",
-                    "label": "CAM3",
-                    "id": "3",
-                    "device": 0,
-                    "input": "3"
-                },
-                "4": {
-                    "name": "Cam 4",
-                    "label": "CAM4",
-                    "id": "4",
-                    "device": 0,
-                    "input": "4"
-                },
-                "5": {
-                    "name": "Cam 5",
-                    "label": "CAM5",
-                    "id": "5",
-                    "device": 0,
-                    "input": "5"
-                },
-                "6": {
-                    "name": "Cam 6",
-                    "label": "CAM6",
-                    "id": "6",
-                    "device": 0,
-                    "input": "6"
-                },
-                "1000": {
-                    "name": "Color Bars",
-                    "label": "Bars",
-                    "id": "1000",
-                    "device": 0,
-                    "input": "1000"
-                },
-                "2001": {
-                    "name": "Color 1",
-                    "label": "Col1",
-                    "id": "2001",
-                    "device": 0,
-                    "input": "2001"
-                },
-                "2002": {
-                    "name": "Color 2",
-                    "label": "Col2",
-                    "id": "2002",
-                    "device": 0,
-                    "input": "2002"
-                },
-                "3010": {
-                    "name": "Media Player 1",
-                    "label": "MP1",
-                    "id": "3010",
-                    "device": 0,
-                    "input": "3010"
-                },
-                "3011": {
-                    "name": "Media 1 Key",
-                    "label": "MP1K",
-                    "id": "3011",
-                    "device": 0,
-                    "input": "3011"
-                },
-                "3020": {
-                    "name": "Media Player 2",
-                    "label": "MP2",
-                    "id": "3020",
-                    "device": 0,
-                    "input": "3020"
-                },
-                "3021": {
-                    "name": "Media Player 2 Key",
-                    "label": "MP2K",
-                    "id": "3021",
-                    "device": 0,
-                    "input": "3021"
-                },
-                "7001": {
-                    "name": "Clean Feed 1",
-                    "label": "Cfd1",
-                    "id": "7001",
-                    "device": 0,
-                    "input": "7001"
-                },
-                "7002": {
-                    "name": "Clean Feed 2",
-                    "label": "Cfd2",
-                    "id": "7002",
-                    "device": 0,
-                    "input": "7002"
-                },
-                "10010": {
-                    "name": "Program",
-                    "label": "Pgm",
-                    "id": "10010",
-                    "device": 0,
-                    "input": "10010"
-                },
-                "10011": {
-                    "name": "Preview",
-                    "label": "Pvw",
-                    "id": "10011",
-                    "device": 0,
-                    "input": "10011"
-                }
-            },
-            "video": {
-                "ME": [
-                    {
-                        "upstreamKeyState": [false],
-                        "upstreamKeyNextState": [false],
-                        "numberOfKeyers": 1,
-                        "programInput": 3010,
-                        "previewInput": 1,
-                        "transitionStyle": 0,
-                        "upstreamKeyNextBackground": true,
-                        "transitionPreview": false,
-                        "transitionPosition": 0,
-                        "transitionFrameCount": 25,
-                        "fadeToBlack": false
-                    }
-                ],
-                "downstreamKeyOn": [false, false],
-                "downstreamKeyTie": [false, false],
-                "auxs": {},
-                "modes": {
-                    0: '525i59.94 NTSC',
-                    1: '625i 50 PAL',
-                    2: '525i59.94 NTSC 16:9',
-                    3: '625i 50 PAL 16:9',
-                    4: '720p50',
-                    5: '720p59.94',
-                    6: '1080i50',
-                    7: '1080i59.94',
-                    8: '1080p23.98',
-                    9: '1080p24',
-                    10: '1080p25',
-                    11: '1080p29.97',
-                    12: '1080p50',
-                    13: '1080p59.94',
-                    14: '2160p23.98',
-                    15: '2160p24',
-                    16: '2160p25',
-                    17: '2160p29.97',
-                }
-            },
-            "audio": {
-                "hasMonitor": false,
-                "numberOfChannels": 0,
-                "channels": {
-                    "1": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "2": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "3": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "4": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "5": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "6": {
-                        "on": false,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    },
-                    "1101": {
-                        "on": true,
-                        "afv": false,
-                        "gain": 0.5011853596610636,
-                        "rawGain": 32768,
-                        "rawPan": 0
-                    }
-                },
-                "master": {
-                    "afv": false,
-                    "gain": 0.5011853596610636,
-                    "rawGain": 32768
-                }
-            },
-            "macro": {
-                "numberOfMacros": 2,
-                "macros":  {
-                    "0": {
-                        id: 0,
-                        name: "Macro 1"
-                    },
-                    "1": {
-                        id: 1,
-                        name: "Macro 2"
-                    }
-                }
-            },
-            "device": 0,
-            "_ver0": 2,
-            "_ver1": 27,
-            "_pin": "ATEM info not recieved",
-            "model": 1
-        }
+        this.state = defaultState;
+        this.visibleInputs = [
+        /*   INPUTS,     BLK,BARS, COLORS,   MEDIA PLAYERS  */
+            [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
+            [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
+            [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
+            [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
+        ];
     }
 
     setWebsocket(websocket) {
@@ -283,153 +30,145 @@ class ATEM {
         }
     }
 
-    get visibleChannels() {
-        let visibleChannels = [];
-        // update channels
-        for (let id in this.state.channels) {
-            const channel = this.state.channels[id];
-            channel.id = id;
-            channel.device = this.state.device;
-            channel.input = id;
+/*
+    get visibleInputs() {
+        let visibleInputs = [];
+        // update input
+        for (let input in this.state.inputs) {
+            input.id = id;
+            input.device = this.state.device;
+            input.input = id;
         }
         // standard inputs
-        for (let id = 1; id < 10; id++) {
-            if (this.state.channels[id]) {
-                visibleChannels.push(this.state.channels[id]);
+        for (let i = 1; i < 10; i++) {
+            if (this.state.inputs[i]) {
+                visibleInputs.push(this.state.inputs[i]);
             } else {
                 break;
             }
         }
         // Black
-        if (this.state.channels[0]) {
-            visibleChannels.push(this.state.channels[0]);
+        if (this.state.inputs[0]) {
+            visibleInputs.push(this.state.inputs[0]);
         }
         // Colors
-        for (let id = 2001; id < 3000; id++) {
-            if (this.state.channels[id]) {
-                visibleChannels.push(this.state.channels[id]);
+        for (let i = 2001; i < 3000; i++) {
+            if (this.state.inputs[i]) {
+                visibleInputs.push(this.state.inputs[i]);
             } else {
                 break;
             }
         }
         // Color Bars
-        if (this.state.channels[1000]) {
-            visibleChannels.push(this.state.channels[1000]);
+        if (this.state.inputs[1000]) {
+            visibleInputs.push(this.state.inputs[1000]);
         }
         // Media Players
-        for (let id = 3010; id < 4000; id += 10) {
-            if (this.state.channels[id]) {
-                visibleChannels.push(this.state.channels[id]);
+        for (let i = 3010; i < 4000; i += 10) {
+            if (this.state.inputs[i]) {
+                visibleInputs.push(this.state.inputs[id]);
             } else {
                 break;
             }
         }
-        return visibleChannels;
+        return visibleInputs;
+    }
+*/
+
+    changeProgramInput(source, mixEffect) {
+        this.sendMessage({method: 'ProgramInputCommand', params: { source, mixEffect } })
+    }
+    changePreviewInput(source, mixEffect) {
+        this.sendMessage({method: 'PreviewInputCommand', params: { source, mixEffect } })
+    }
+    autoTransition(mixEffect) {
+        this.sendMessage({method: 'AutoTransitionCommand', params: { mixEffect } });
+    }
+    cutTransition(mixEffect) {
+        this.sendMessage({method: 'CutCommand', params: { mixEffect } });
+    }
+    fadeToBlack(mixEffect) {
+        this.sendMessage({method: 'FadeToBlackAutoCommand', params: { mixEffect } });
     }
 
-    isProgramChannel(channel) {
-        return this.state.video.ME[0].programInput === parseInt(channel.input);
+    previewTransition(mixEffect) {
+        const preview = !this.state.video.ME[mixEffect].transitionPreview;
+        this.sendMessage({method: 'PreviewTransitionCommand', params: { preview, mixEffect } });
     }
 
-    isPreviewChannel(channel) {
-        return this.state.video.ME[0].previewInput === parseInt(channel.input);
+    setTransitionPosition(handlePosition, mixEffect) {
+        this.sendMessage({method: 'TransitionPositionCommand', params: {mixEffect, handlePosition} });
     }
 
-    changeProgramInput(input) {
-        this.sendMessage({ method: 'changeProgramInput', params: { device: this.state.device, input } })
+    setTransitionStyle(style, mixEffect) {
+        this.sendMessage({method: 'TransitionPropertiesCommand', params: {style, mixEffect} });
     }
 
-    changePreviewInput(input) {
-        this.sendMessage({ method: 'changePreviewInput', params: { device: this.state.device, input } })
-    }
-
-    changeProgram(channel) {
-        return this.changeProgramInput(this.state.device, channel.input);
-    }
-
-    changePreview(channel) {
-        return this.changePreviewInput(channel.input);
+    setDownstreamKeyTie(tie, downstreamKeyerId) {
+        this.sendMessage({method: 'DownstreamKeyTieCommand', params: {downstreamKeyerId, tie}});
     };
 
-    autoTransition() {
-        this.sendMessage({ method: 'autoTransition', params: { device: this.state.device } });
-    }
-
-    cutTransition() {
-        this.sendMessage({ method: 'cutTransition', params: { device: this.state.device } });
-    }
-
-    changeTransitionPreview() {
-        const status = !this.state.video.ME[0].transitionPreview;
-        this.sendMessage({ method: 'changeTransitionPreview', params: { device: this.state.device, status } });
-    }
-
-    changeTransitionPosition(percent) {
-        console.assert(percent);
-        this.sendMessage({ method: 'changeTransitionPosition', params: { device: this.state.device, position: parseFloat(percent) * 10000 } });
-    }
-
-    changeTransitionType(type) {
-        this.sendMessage({ method: 'changeTransitionType', params: { type } });
-    }
-
-    toggleUpstreamKeyNextBackground() {
-        const status = !this.state.video.ME[0].upstreamKeyNextBackground;
-        this.sendMessage({ method: 'changeUpstreamKeyNextBackground', params: { device: this.state.device, status } });
+    setDownstreamKeyOnAir(onAir, downstreamKeyerId) {
+        this.sendMessage({method: 'DownstreamKeyOnAirCommand', params: {downstreamKeyerId, onAir}});
     };
 
-    toggleUpstreamKeyNextState(number) {
-        const status = !this.state.video.ME[0].upstreamKeyNextState[number];
-        this.sendMessage({ method: 'changeUpstreamKeyNextBackground', params: { device: this.state.device, number, status } });
-    };
-
-    toggleUpstreamKeyState(number) {
-        const state = !this.state.video.ME[0].upstreamKeyState[number];
-        this.sendMessage({ method: 'changeUpstreamKeyState', params: { device: this.state.device, number, state } });
-    };
-
-    toggleDownstreamKeyTie(number) {
-        const state = !this.state.video.downstreamKeyTie[number];
-        this.sendMessage({ method: 'changeDownstreamKeyTie', params: { device: this.state.device, number, state } });
-    };
-
-    toggleDownstreamKeyOn(number) {
-        const state = !this.state.video.downstreamKeyOn[number];
-        this.sendMessage({ method: 'changeDownstreamKeyOn', params: { device: this.state.device, number, state } });
-    };
-
-    autoDownstreamKey(number) {
-        this.sendMessage({ method: 'autoDownstreamKey', params: { device: this.state.device, number } });
-    }
-    fadeToBlack() {
-        this.sendMessage({ method: 'fadeToBlack', params: { device: this.state.device } });
+    autoDownstreamKey(downstreamKeyerId, isTowardsOnAir) {
+        this.sendMessage({method: 'DownstreamKeyAutoCommand', params: {downstreamKeyerId, isTowardsOnAir} });
     }
 
-    runMacro(number) {
-        console.log("Running Macro: ", number);
-        this.sendMessage({ method: 'runMacro', params: {number} });
+    toggleUpstreamKeyNextBackground(ME) {
+        // TODO
+        const status = !this.state.video.ME[ME].upstreamKeyNextBackground;
+        this.sendMessage({method: 'changeUpstreamKeyNextBackground', params: { status } });
+    };
+
+    setUpstreamKeyerFly(flyEnabled, mixEffect, upstreamKeyerId) {
+        this.sendMessage({method: 'MixEffectKeyTypeSetCommand', params: { flyEnabled, mixEffect, upstreamKeyerId } });
+    };
+
+    setUpstreamKeyerOnAir(onAir, mixEffect, upstreamKeyerId) {
+        this.sendMessage({
+            method: 'MixEffectKeyOnAirCommand',
+            params: { mixEffect, upstreamKeyerId, onAir }
+        });
+    };
+
+    macroRun(index) {
+        console.log("macroRun ", index);
+        this.sendMessage({method: 'MacroActionCommand', params: {index, action: 0} });
+    }
+    macroStop() {
+        console.log("macroStop");
+        this.sendMessage({method: 'MacroActionCommand', params: {index: 0, action: 1} });
+    }
+    macroStopRecord() {
+        console.log("macroStopRecord");
+        this.sendMessage({method: 'MacroActionCommand', params: {index: 0, action: 2} });
     }
 
-    uploadMediaFile(file, number) {
+    uploadMediaFile(file, index) {
         let img, reader;
         let atem = this;
+        let [width, height] = getResolution(this.state.settings.videoMode)
         if (file.type.match(/image.*/)) {
-          img = document.querySelectorAll('.media-thumb img')[number];
+          img = document.querySelectorAll('.media-thumb img')[index];
           reader = new FileReader();
           reader.onload = function(e) {
             img.onload = function() {
                 let canvas, ctx;
                 canvas = document.createElement("canvas");
-                canvas.width = 1280
-                canvas.height = 720
+                canvas.width = width
+                canvas.height = height
                 ctx = canvas.getContext("2d");
-                ctx.drawImage(img, 0, 0, 1280, 720);
+                ctx.drawImage(img, 0, 0, width, height);
+                console.log('drawing Image', width, height)
                 // upload to server
                 atem.sendMessage({
                     method: "uploadMedia",
                     params: {
                         device: atem.state.device,
-                        number: number || 0,
+                        index: index || 0,
+                        name: file.name,
                         media: canvas.toDataURL("image/png")
                     }
                 });
@@ -443,4 +182,20 @@ class ATEM {
       }
 }
 
-module.exports = { ATEM };
+function getResolution(videoMode) {
+    const PAL = [720, 576];
+    const NTSC = [640, 480];
+    const HD = [1280, 720];
+    const FHD = [1920, 1080];
+    const UHD = [3840, 2160];
+    const enumToResolution = [
+        NTSC, PAL, NTSC, PAL,
+        HD, HD,
+        FHD, FHD, FHD, FHD, FHD, FHD, FHD, FHD,
+        UHD, UHD, UHD, UHD,
+        UHD, UHD
+    ];
+    return enumToResolution[videoMode];
+}
+
+module.exports = { Atem };

@@ -1,9 +1,9 @@
 const express    = require('express');
 const fileUpload = require('express-fileupload');
-const ATEM = require('applest-atem');
-const FileUploader = ATEM.FileUploader
+const { Atem, Commands, listVisibleInputs } = require('atem-connection')
 const config     = require('../config.json');
 const fs         = require('fs');
+const { PassThrough } = require('stream');
 
 const app = express();
 var expressWs = require('express-ws')(app);
@@ -16,24 +16,55 @@ let CLIENTS = expressWs.getWss().clients;
 let device = 0;
 for (var switcher of config.switchers) {
   console.log('Initializing switcher', switcher.addr, switcher.port)
-  atem = new ATEM;
-  atem.event.setMaxListeners(5);
-  atem.connect(switcher.addr, switcher.port);
+  atem = new Atem({ externalLog: console.log })
+  atem.connect(switcher.addr);
   atem.state.device = device;
   switchers.push(atem);
 
-  atem.on('stateChanged', (err, state) => {
-    // console.log('atem stateChanged')
-    broadcast(JSON.stringify(state));
-  })
-  atem.on('connect', (err) => {
+  atem.on('stateChanged', function (state, path) {
+    if (path != 'info.lastTime') {
+      // console.log('atem stateChanged', path)
+      let paths = ['state']
+      for (let a of path.split('.')) {
+        const parent = state;
+        if (Array.isArray(state)) {
+          state = state[+a];
+        } else {
+          state = state[a];
+        }
+        if (typeof state === 'undefined') {
+          if (a === 'transition') {
+            // XXX - maybe it should be fixed in atem-connection lib
+            a = 'transitionPosition'
+            state = parent[a];
+          } else {
+            state = parent;
+            break;
+          }
+        }
+        paths.push(a);
+      }
+    
+      // console.log('changed', paths.join('.'), state)
+      broadcast(JSON.stringify({
+        event: 'changed',
+        device: atem.device,
+        path: paths.join('.'),
+        state: state
+      }));
+    }
+  });
+  atem.on('connected', () => {
     console.log('atem connected');
-    broadcast(JSON.stringify({ method: 'connect', device: atem.device }));
-  })
-  atem.on('disconnect', (err) => {
+    broadcast(JSON.stringify({ event: 'connected', device: atem.device }));
+  });
+  atem.on('disconnected', (err) => {
     console.log('atem disconnected');
-    broadcast(JSON.stringify({ method: 'disconnect', device: atem.device }));
-  })
+    broadcast(JSON.stringify({ event: 'disconnected', device: atem.device }));
+  });
+  atem.on('error', (err) => {
+    console.log('atem error', err);
+  });
   device += 1;
 }
 
@@ -52,8 +83,8 @@ app.post('/uploadMedia', function (req, res) {
   if (Object.keys(req.files).length == 0) {
     return res.status(400).send('No files were uploaded.');
   }
-  let fileUploader = new ATEM.FileUploader(switchers[0]);
-  fileUploader.uploadFromPNGBuffer(req.files.media.data, req.params.bankIndex || 0);
+  // let fileUploader = new ATEM.FileUploader(switchers[0]);
+  // fileUploader.uploadFromPNGBuffer(req.files.media.data, req.params.bankIndex || 0);
   return res.status(200).send('Media was successfuly uploaded.');
 });
 
@@ -61,12 +92,17 @@ app.use(express.static(__dirname + '/../public', {
   index: 'index.html',
 }));
 
-app.ws('/ws', function(ws, req) {
+app.ws('/ws', function (ws, req) {
   const ip = req.connection.remoteAddress;
   console.log(ip, 'connected');
   // initialize client with all switchers
-  for (var atem of switchers) {
-    ws.send(JSON.stringify(atem.state));
+  for (const atem of switchers) {
+    ws.send(JSON.stringify({ path: "", state: atem.state }));
+    const visibleInputs = [];
+    for (let me = 0; me < me.state.info.capabilities.MEs; me++) {
+      visibleInputs.push(listVisibleInputs("program", atem.state, me));
+      ws.send(JSON.stringify({path: "visibleInputs", state: visibleInputs}));
+    }
   }
 
   ws.on('message', function incoming(message) {
@@ -78,52 +114,27 @@ app.ws('/ws', function(ws, req) {
     const atem = switchers[params.device || 0];
 
     switch (method) {
-      case 'changePreviewInput':
-      case 'changeProgramInput':
-        atem[method](params.input);
-      break;
-      case 'autoTransition':
-      case 'cutTransition':
-      case 'fadeToBlack':
-        atem[method]();
-      break;
-      case 'changeUpstreamKeyState':
-      case 'changeUpstreamKeyNextState':
-        atem[method](params.number, params.state);
-      break;
-      case 'changeDownstreamKeyOn':
-      case 'changeDownstreamKeyTie':
-        atem[method](params.number, params.state);
-      break;
-      case 'changeTransitionPreview':
-        atem[method](params.state, params.me);
-      break;
-      case 'changeTransitionPosition':
-        atem[method](params.position);
-      break;
-      case 'changeTransitionType':
-        atem[method](params.type);
-      break;
-      case 'changeUpstreamKeyNextBackground':
-        atem[method](params.state);
-      break;
-      case 'autoDownstreamKey':
-        atem[method](params.number);
-      break;
-      case 'runMacro':
-        atem[method](params.number);
-      break;
       case 'uploadMedia':
         let matches = params.media.match(/^data:(\w+\/\w+);base64,(.*)$/);
         if (matches[1] == 'image/png') {
           const buffer = Buffer.from(matches[2], 'base64');
-          // fs.writeFileSync('media'+number+'.png', buffer);
-          const fileUploader = new FileUploader(atem);
-          fileUploader.uploadFromPNGBuffer(buffer, params.number);
+          atem.uploadStill(data.index, buffer, data.name, data.description)
         } else {
           console.error('Uploaded image is not png');
         }
-      break;
+        break;
+      default:
+        const command = new Commands[method]();
+        if (params.mixEffect)
+          command.mixEffect = params.mixEffect;
+        if (params.upstreamKeyerId)
+          command.upstreamKeyerId = params.upstreamKeyerId;
+        if (params.downstreamKeyerId)
+          command.downstreamKeyerId = params.downstreamKeyerId;
+        if (params.index)
+          command.index = params.index;
+        command.updateProps(params);
+        atem.sendCommand(command);
     }
   });
 });
