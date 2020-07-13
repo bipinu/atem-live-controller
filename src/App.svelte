@@ -1,13 +1,13 @@
 <script>
   import { onMount } from "svelte";
-  import { Atem } from "./atem.js";
+  import { AtemClient } from "./atem.js";
   import Feather from "./Feather.svelte";
 
-  let switchers = [];
-
   let ws;
+  let atems = [];
   let intervalID = 0;
-  let currentME = 1;
+  let currentME = 0;
+
 
   function deepSet(obj, path, value){
       for (var i=0, path=path.split('.'), len=path.length-1; i<len; i++){
@@ -25,31 +25,37 @@
     let url  = window.location + "";
     url = url.slice(0, url.lastIndexOf("/"));
     url = url.replace("http", "ws");
+    if (ws) ws.close();
+    atems[0] = new AtemClient();
     ws = new WebSocket(url + "/ws");
     ws.addEventListener("open", function(event) {
       console.log("Websocket opened");
       intervalID = clearTimeout(intervalID);
-      switchers[0] = new Atem();
-      switchers[0].setWebsocket(ws);
+      atems[0].setWebsocket(ws);
       // update svelte
       ws = ws;
     });
     ws.addEventListener("message", function(event) {
       let data = JSON.parse(event.data);
-      let device = data.device || 0;
       switch (data.event) {
         case 'connected':
           console.log(data);
-          switchers[device].connected = true;
+          atems[0].connected = true;
         break;
         case 'disconnected':
           console.log(data);
-          switchers[device].connected = false;
+          atems[0].connected = false;
         break;
         case 'changed':
-          if (data.path === 'state') console.log(data);
-          switchers[device].connected = true;
-          deepSet(switchers[device], data.path, data.state)
+          if (data.path === 'state') {
+            console.log(data);
+          }
+          atems[0].connected = true;
+          deepSet(atems[0], data.path, data.state)
+          console.log('atem', atems[0])
+          if (data.path === 'state' || data.path === 'state.inputs') {
+            atems[0].visibleInputs = atems[0].getVisibleInputs();
+          }
       }
       return data;
     });
@@ -67,14 +73,15 @@
     var key = event.key || event.keyCode;
     if (key === " " || key === 32) {
       event.preventDefault();
-      switchers[0].cutTransition();
+      atems[0].cutTransition(currentME);
     } else if (key === "Enter" || key === 13) {
-      switchers[0].autoTransition();
+      atems[0].cutTransition(currentME);
+      atems[0].autoTransition(currentME);
     } else if (key >= "0" && key <= "9") {
       if (event.getModifierState("Control")) {
-        switchers[0].changeProgramInput(key);
+        atems[0].changeProgramInput(+key, currentME);
       } else {
-        switchers[0].changePreviewInput(key);
+        atems[0].changePreviewInput(+key, currentME);
       }
     }
   }
@@ -85,7 +92,7 @@
   });
 </script>
 
-{#each switchers as atem}
+{#each atems as atem}
 <header>
   <h1>{atem.state.info.productIdentifier}</h1>
   <a href="#switcher" class="tab"><Feather icon="grid"/>Switcher</a>
@@ -103,8 +110,8 @@
   </span>
 </header>
 
-<div id="switcher" class="screen">
-  {#if atem.state.info.capabilities.MEs > 2}
+<div id="atem" class="screen">
+  {#if atem.state.info.capabilities.MEs > 1}
   <div class="button-group horizontal mix-effect-buttons" role="group" aria-label="Mix Effects">
   {#each Object.values(atem.state.video.ME) as ME}
     <button type="button" class="gray-button"

@@ -1,19 +1,23 @@
 /*
-    This class is very similar to atem-connection Atem class
+    This class is very similar to atem-connection AtemClient class
     but this communicates via websocket to node server
 */
-var defaultState = require('./state.default.json');
+const defaultState = require('./state.constellation.json');
+// const tally = require("./tally");
 
-class Atem {
+console.log(defaultState)
+
+class AtemClient {
     constructor() {
         this.state = defaultState;
-        this.visibleInputs = [
-        /*   INPUTS,     BLK,BARS, COLORS,   MEDIA PLAYERS  */
+        this.visibleInputs = this.getVisibleInputs()
+        /* [
+        //   INPUTS,     BLK,BARS, COLORS,   MEDIA PLAYERS
             [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
             [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
             [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
             [1,2,3,4,5,6, 0, 1000, 2001,2002, 3010,3020],
-        ];
+        ]; */
     }
 
     setWebsocket(websocket) {
@@ -30,9 +34,30 @@ class Atem {
         }
     }
 
-/*
-    get visibleInputs() {
+    /*
+    isProgramInput(me, input) {
+        return tally.listVisibleInputs("program", this.state, me || 0).has(input);
+    }
+    isPreviewInput(me, input) {
+        return tally.listVisibleInputs("preview", this.state, me || 0).has(input);
+    }
+    */
+
+    getVisibleInputs() {
         let visibleInputs = [];
+        console.log('inputs', this.state.inputs)
+        for (let me = 0; me < this.state.info.capabilities.MEs; me++) {
+            const bitME = 1 << me;
+            visibleInputs[me] = [];
+            const inputs = this.state.inputs;
+            for (let i = 0; i < this.state.inputs.length; i++) {
+                if (inputs[i] && inputs[i].meAvailability & bitME) {
+                    visibleInputs[me].push(i);
+                }
+            }
+        }
+        return visibleInputs;
+
         // update input
         for (let input in this.state.inputs) {
             input.id = id;
@@ -73,7 +98,6 @@ class Atem {
         }
         return visibleInputs;
     }
-*/
 
     changeProgramInput(source, mixEffect) {
         this.sendMessage({method: 'ProgramInputCommand', params: { source, mixEffect } })
@@ -198,4 +222,4 @@ function getResolution(videoMode) {
     return enumToResolution[videoMode];
 }
 
-module.exports = { Atem };
+module.exports = { AtemClient };
