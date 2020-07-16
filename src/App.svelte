@@ -3,71 +3,8 @@
   import { AtemClient } from "./atem.js";
   import Feather from "./Feather.svelte";
 
-  let ws;
   let atems = [];
-  let intervalID = 0;
   let currentME = 0;
-
-
-  function deepSet(obj, path, value){
-      for (var i=0, path=path.split('.'), len=path.length-1; i<len; i++){
-        if (Array.isArray(obj)) {
-          obj = obj[+path[i]];
-        } else {
-          obj = obj[path[i]];
-        }
-      };
-      return obj[path[i]] = value;
-  };
-
-  function doConnect() {
-    console.debug("Opening websocket...");
-    let url  = window.location + "";
-    url = url.slice(0, url.lastIndexOf("/"));
-    url = url.replace("http", "ws");
-    if (ws) ws.close();
-    atems[0] = new AtemClient();
-    ws = new WebSocket(url + "/ws");
-    ws.addEventListener("open", function(event) {
-      console.log("Websocket opened");
-      intervalID = clearTimeout(intervalID);
-      atems[0].setWebsocket(ws);
-      // update svelte
-      ws = ws;
-    });
-    ws.addEventListener("message", function(event) {
-      let data = JSON.parse(event.data);
-      switch (data.event) {
-        case 'connected':
-          console.log(data);
-          atems[0].connected = true;
-        break;
-        case 'disconnected':
-          console.log(data);
-          atems[0].connected = false;
-        break;
-        case 'changed':
-          if (data.path === 'state') {
-            console.log(data);
-          }
-          atems[0].connected = true;
-          deepSet(atems[0], data.path, data.state)
-          console.log('atem', atems[0])
-          if (data.path === 'state' || data.path === 'state.inputs') {
-            atems[0].visibleInputs = atems[0].getVisibleInputs();
-          }
-      }
-      return data;
-    });
-    ws.addEventListener("error", function() {
-      console.log("Websocket error");
-      intervalID = setTimeout(doConnect, 1000);
-    });
-    ws.addEventListener("close", function() {
-      console.log("Websocket closed");
-      intervalID = setTimeout(doConnect, 1000);
-    });
-  }
 
   function onKeyUp(event) {
     var key = event.key || event.keyCode;
@@ -87,7 +24,12 @@
   }
 
   onMount(() => {
-    doConnect();
+    console.debug("Opening websocket...");
+    let url  = window.location + "";
+    url = url.slice(0, url.lastIndexOf("/"));
+    url = url.replace("http", "ws");
+    atems[0] = new AtemClient(url + "/ws");
+
     document.addEventListener("keyup", onKeyUp);
   });
 </script>
@@ -98,9 +40,9 @@
   <a href="#switcher" class="tab"><Feather icon="grid"/>Switcher</a>
   <a href="#media" class="tab"><Feather icon="film"/>Media</a>
   <a href="#macros" class="tab"><Feather icon="box"/>Macros</a>
-  <span class="tab connection-status" class:connected={ws.readyState === 1}
+  <span class="tab connection-status" class:connected={atem.websocket.readyState == window.WebSocket.OPEN}
         title="Connection status: green=connected, red=disconnected">
-    {#if ws.readyState === 1}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
+    {#if atem.websocket.readyState == window.WebSocket.OPEN}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
     Server
   </span>
   <span class="tab connection-status" class:connected={atem.connected}

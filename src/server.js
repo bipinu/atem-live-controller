@@ -2,8 +2,6 @@ const express    = require('express');
 const fileUpload = require('express-fileupload');
 const { Atem, Commands, listVisibleInputs } = require('atem-connection')
 const config     = require('../config.json');
-const fs         = require('fs');
-const { PassThrough } = require('stream');
 
 const app = express();
 var expressWs = require('express-ws')(app);
@@ -47,8 +45,6 @@ for (var switcher of config.switchers) {
     
       // console.log('changed', paths.join('.'), state)
       broadcast(JSON.stringify({
-        event: 'changed',
-        device: atem.device,
         path: paths.join('.'),
         state: state
       }));
@@ -56,11 +52,11 @@ for (var switcher of config.switchers) {
   });
   atem.on('connected', () => {
     console.log('atem connected');
-    broadcast(JSON.stringify({ event: 'connected', device: atem.device }));
+    broadcast(JSON.stringify({ path: 'connected', state: true }));
   });
   atem.on('disconnected', (err) => {
     console.log('atem disconnected');
-    broadcast(JSON.stringify({ event: 'disconnected', device: atem.device }));
+    broadcast(JSON.stringify({ path: 'connected', state: false }));
   });
   atem.on('error', (err) => {
     console.log('atem error', err);
@@ -97,7 +93,7 @@ app.ws('/ws', function (ws, req) {
   console.log(ip, 'connected');
   // initialize client with all switchers
   for (const atem of switchers) {
-    ws.send(JSON.stringify({ path: "", state: atem.state }));
+    ws.send(JSON.stringify({ path: "state", state: atem.state }));
     const visibleInputs = [];
     for (let me = 0; me < me.state.info.capabilities.MEs; me++) {
       visibleInputs.push(listVisibleInputs("program", atem.state, me));
@@ -125,14 +121,22 @@ app.ws('/ws', function (ws, req) {
         break;
       default:
         const command = new Commands[method]();
-        if (params.mixEffect)
+        if (params.mixEffect){
           command.mixEffect = params.mixEffect;
-        if (params.upstreamKeyerId)
+          params.mixEffect = undefined;
+        }
+        if (params.upstreamKeyerId){
           command.upstreamKeyerId = params.upstreamKeyerId;
-        if (params.downstreamKeyerId)
+          params.upstreamKeyerId = undefined;
+        }
+        if (params.downstreamKeyerId){
           command.downstreamKeyerId = params.downstreamKeyerId;
-        if (params.index)
+          params.downstreamKeyerId = undefined;
+        }
+        if (params.index){
           command.index = params.index;
+          params.index = undefined;
+        }
         command.updateProps(params);
         atem.sendCommand(command);
     }
