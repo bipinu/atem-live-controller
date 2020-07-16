@@ -3,6 +3,7 @@
     but this communicates via websocket to node server
 */
 const defaultState = require('./state.constellation.json');
+const { readable, writable } = require('svelte/store');
 
 function deepSet(obj, path, value) {
     for (var i = 0, path = path.split('.'), len = path.length - 1; i < len; i++) {
@@ -21,38 +22,40 @@ class AtemClient {
         this.state = defaultState;
         this.visibleInputs = this.getVisibleInputs()
         this.websocketUrl = websocketUrl;
-        this.reconnect()
+        this.reconnect();
+        this.store = writable(this)
     }
 
     reconnect() {
         this.websocket = new WebSocket(this.websocketUrl);
+        const atem = this;
         this.websocket.addEventListener("open", function (event) {
             console.log("Websocket opened");
             this.intervalID = clearTimeout(this.intervalID);
             // Svelte update connected status
-            this.websocket = this.websocket;
+            atem.store.set(this);
         });
         this.websocket.addEventListener("message", (event) => {
             const { path, state } = JSON.parse(event.data);
             console.log(path, state);
-            deepSet(this, path, state)
+            deepSet(atem, path, state)
             if (path === 'state' || path === 'state.inputs' || path == 'connected') {
-                this.visibleInputs = this.getVisibleInputs();
+                atem.visibleInputs = atem.getVisibleInputs();
             }
-            this = this;
+            atem.store.set(this);
         });
         this.websocket.addEventListener("error", () => {
             console.log("Websocket error");
             this.websocket.close();
             this.intervalID = setTimeout(this.reconnect, 1000);
             // Svelte update connected status
-            this.websocket = this.websocket;
+            atem.store.set(this);
         });
         this.websocket.addEventListener("close", () => {
             console.log("Websocket closed");
             this.intervalID = setTimeout(this.reconnect, 1000);
             // Svelte update connected status
-            this.websocket = this.websocket;
+            atem.store.set(this);
         });
     }
 
@@ -261,4 +264,6 @@ function getResolution(videoMode) {
     return enumToResolution[videoMode];
 }
 
-module.exports = { AtemClient };
+module.exports = {
+    AtemClient,
+};

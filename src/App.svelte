@@ -1,40 +1,41 @@
 <script>
-  import { onMount } from "svelte";
-  import { AtemClient } from "./atem.js";
+  import { onMount, onDestroy } from "svelte";
+  import { AtemClient } from "./atemclient.js";
   import Feather from "./Feather.svelte";
 
-  let atems = [];
+  let atem = new AtemClient(window.location.origin.replace("http", "ws") + "/ws");
+  window.atem = atem;
   let currentME = 0;
+  let unsubscribe;
+
+  onMount(() => {
+    document.addEventListener("keyup", onKeyUp);
+    unsubscribe = atem.store.subscribe(value => {atem = value});
+  });
+
+  onMount(() => {
+    unsubscribe();
+  })
 
   function onKeyUp(event) {
     var key = event.key || event.keyCode;
     if (key === " " || key === 32) {
       event.preventDefault();
-      atems[0].cutTransition(currentME);
+      atem.cutTransition(currentME);
     } else if (key === "Enter" || key === 13) {
-      atems[0].cutTransition(currentME);
-      atems[0].autoTransition(currentME);
+      atem.cutTransition(currentME);
+      atem.autoTransition(currentME);
     } else if (key >= "0" && key <= "9") {
       if (event.getModifierState("Control")) {
-        atems[0].changeProgramInput(+key, currentME);
+        atem.changeProgramInput(+key, currentME);
       } else {
-        atems[0].changePreviewInput(+key, currentME);
+        atem.changePreviewInput(+key, currentME);
       }
     }
   }
 
-  onMount(() => {
-    console.debug("Opening websocket...");
-    let url  = window.location + "";
-    url = url.slice(0, url.lastIndexOf("/"));
-    url = url.replace("http", "ws");
-    atems[0] = new AtemClient(url + "/ws");
-
-    document.addEventListener("keyup", onKeyUp);
-  });
 </script>
 
-{#each atems as atem}
 <header>
   <h1>{atem.state.info.productIdentifier}</h1>
   <a href="#switcher" class="tab"><Feather icon="grid"/>Switcher</a>
@@ -53,7 +54,7 @@
 </header>
 
 <div id="atem" class="screen">
-  {#if atem.state.info.capabilities.MEs > 1}
+  {#if Object.keys(atem.state.video.ME).length > 1}
   <div class="button-group horizontal mix-effect-buttons" role="group" aria-label="Mix Effects">
   {#each Object.values(atem.state.video.ME) as ME}
     <button type="button" class="gray-button"
@@ -63,7 +64,7 @@
   {/each}
   </div>
   {/if}
-  {#each [atem.state.video.ME[currentME]] as ME}
+  {#each atem.state.video.ME[currentME] && [atem.state.video.ME[currentME]] as ME}
   <section class="channels">
     <h3>Mix Effects {ME.index+1} Program & Preview</h3>
     <div class="well">
@@ -234,5 +235,3 @@
     </div>
   </div>
 </div> <!-- screen macros -->
-
-{/each}
