@@ -91,15 +91,8 @@ app.use(express.static(__dirname + '/../public', {
 app.ws('/ws', function (ws, req) {
   const ip = req.connection.remoteAddress;
   console.log(ip, 'connected');
-  // initialize client with all switchers
-  for (const atem of switchers) {
-    ws.send(JSON.stringify({ path: "state", state: atem.state }));
-    const visibleInputs = [];
-    for (let me = 0; me < me.state.info.capabilities.MEs; me++) {
-      visibleInputs.push(listVisibleInputs("program", atem.state, me));
-      ws.send(JSON.stringify({path: "visibleInputs", state: visibleInputs}));
-    }
-  }
+  // initialize client with switcher state
+  ws.send(JSON.stringify({ path: "state", state: switchers[0].state }));
 
   ws.on('message', function incoming(message) {
     /* JSON-RPC v2 compatible call */
@@ -123,19 +116,19 @@ app.ws('/ws', function (ws, req) {
         const command = new Commands[method]();
         if (params.mixEffect){
           command.mixEffect = params.mixEffect;
-          params.mixEffect = undefined;
+          delete params.mixEffect;
         }
         if (params.upstreamKeyerId){
           command.upstreamKeyerId = params.upstreamKeyerId;
-          params.upstreamKeyerId = undefined;
+          delete params.upstreamKeyerId;
         }
         if (params.downstreamKeyerId){
           command.downstreamKeyerId = params.downstreamKeyerId;
-          params.downstreamKeyerId = undefined;
+          delete params.downstreamKeyerId;
         }
         if (params.index){
           command.index = params.index;
-          params.index = undefined;
+          delete params.index;
         }
         command.updateProps(params);
         atem.sendCommand(command);

@@ -6,7 +6,6 @@ The customizable video switchers web controller.
 - keyboard shortcuts as in original ATEM switchers app: 1-8 changes preview, Ctrl+1-8 changes program, Spacebar for CUT transition and Enter for AUTO transition.
 - websocket communication with server for more efficient and faster reactions
 - Svelte reactive frontend for simpler development
-- HTTP API for integration with other apps
 
 # Installation
 - Copy `config.json.sample` to `config.json`
@@ -56,10 +55,29 @@ Then go to this address in your browser: `http://localhost:8080/` or `http://hos
 - camera control tab
 - support more atem functionality
 
+1. Macros
+    - [x]  12-16 compact buttons to trigger Macros.
+    - [ ]  A method to save a macro?
+    - [ ]  Method to change Macro button label or fetch button name from ATEM?
+2. Media Players/HyperDeck Control
+    - [ ]  Control Media player clip selection for Media Players 1-4
+    - [ ]  Play/pause control
+    - [ ]  Ability to upload media?
+    - [ ]  Same abilities for HyperDeck control?
+3. Integrate additional controls
+    - [x]  Add tabs for other ME’s of the Constellation (tab for ME/2.ME/3 and ME/4) {"device":1} , {"device":2},{"device":3}
+    - [x]  Add 2 rows of Camera input buttons looking to get the buttons that are currently there + up to camera 20
+    - [x]  Add Super Source buttons to ME/1
+    - [x]  Add Downstream Key 3 and 4
+    - [x]  Add Next Transition Key 3 and 4
+4. Remove Controls
+    - [ ]  Transition style to just have DVE and MIX
+    - [ ]  Remove Fade to Black
+
 # Thanks
 - Font made by "とろ庵" http://www.trojanbear.net/s/category/font
 - svelte framework
-- applest-atem library for communication with atem hardware
+- atem-connection library for communication with atem hardware
 
 # License
 The MIT License (MIT)

@@ -3,66 +3,52 @@
     but this communicates via websocket to node server
 */
 const defaultState = require('./state.constellation.json');
-const { readable, writable } = require('svelte/store');
-
-function deepSet(obj, path, value) {
-    for (var i = 0, path = path.split('.'), len = path.length - 1; i < len; i++) {
-        if (Array.isArray(obj)) {
-            obj = obj[+path[i]];
-        } else {
-            obj = obj[path[i]];
-        }
-    };
-    return obj[path[i]] = value;
-};
+const { writable } = require('svelte/store');
 
 
 class AtemClient {
-    constructor(websocketUrl) {
+    constructor(websocket) {
         this.state = defaultState;
         this.visibleInputs = this.getVisibleInputs()
-        this.websocketUrl = websocketUrl;
-        this.reconnect();
-        this.store = writable(this)
+        this.websocket = websocket;
     }
 
     reconnect() {
         this.websocket = new WebSocket(this.websocketUrl);
-        const atem = this;
         this.websocket.addEventListener("open", function (event) {
             console.log("Websocket opened");
             this.intervalID = clearTimeout(this.intervalID);
-            // Svelte update connected status
-            atem.store.set(this);
+            atem.connected = true;
         });
         this.websocket.addEventListener("message", (event) => {
             const { path, state } = JSON.parse(event.data);
+            if (path === 'state') return;
             console.log(path, state);
             deepSet(atem, path, state)
             if (path === 'state' || path === 'state.inputs' || path == 'connected') {
                 atem.visibleInputs = atem.getVisibleInputs();
             }
-            atem.store.set(this);
         });
         this.websocket.addEventListener("error", () => {
             console.log("Websocket error");
             this.websocket.close();
             this.intervalID = setTimeout(this.reconnect, 1000);
             // Svelte update connected status
-            atem.store.set(this);
+            atem.connected = false;
         });
         this.websocket.addEventListener("close", () => {
             console.log("Websocket closed");
             this.intervalID = setTimeout(this.reconnect, 1000);
             // Svelte update connected status
             atem.store.set(this);
+            atem.connected = false;
         });
     }
 
     sendMessage(data) {
         if (this.websocket.readyState == WebSocket.OPEN) {
+            console.log('sendMessage', data);
             const message = JSON.stringify(data);
-            // console.log('sendMessage', message);
             this.websocket.send(message);
         } else {
             console.warn('Websocket is closed. Cannot send message.')
@@ -143,9 +129,11 @@ class AtemClient {
 
     changeProgramInput(source, mixEffect) {
         this.sendMessage({ method: 'ProgramInputCommand', params: { source, mixEffect } })
+        this.state.video.ME[0].programInput = source;
     }
     changePreviewInput(source, mixEffect) {
         this.sendMessage({ method: 'PreviewInputCommand', params: { source, mixEffect } })
+        this.state.video.ME[0].previewInput = source;
     }
     autoTransition(mixEffect) {
         this.sendMessage({ method: 'AutoTransitionCommand', params: { mixEffect } });
@@ -166,10 +154,6 @@ class AtemClient {
         this.sendMessage({ method: 'TransitionPositionCommand', params: { mixEffect, handlePosition } });
     }
 
-    setTransitionStyle(style, mixEffect) {
-        this.sendMessage({ method: 'TransitionPropertiesCommand', params: { style, mixEffect } });
-    }
-
     setDownstreamKeyTie(tie, downstreamKeyerId) {
         this.sendMessage({ method: 'DownstreamKeyTieCommand', params: { downstreamKeyerId, tie } });
     };
@@ -182,10 +166,13 @@ class AtemClient {
         this.sendMessage({ method: 'DownstreamKeyAutoCommand', params: { downstreamKeyerId, isTowardsOnAir } });
     }
 
-    toggleUpstreamKeyNextBackground(ME) {
-        // TODO
-        const status = !this.state.video.ME[ME].upstreamKeyNextBackground;
-        this.sendMessage({ method: 'changeUpstreamKeyNextBackground', params: { status } });
+    toggleUpstreamKeyNext(index, mixEffect) {
+        const selection = this.state.video.ME[mixEffect].transitionProperties.selection ^ (1 << index);
+        this.setTransitionStyle({selection}, mixEffect);
+    };
+
+    setTransitionStyle(properties, mixEffect) {
+        this.sendMessage({ method: 'TransitionPropertiesCommand', params: { properties, mixEffect } });
     };
 
     setUpstreamKeyerFly(flyEnabled, mixEffect, upstreamKeyerId) {

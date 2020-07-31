@@ -3,17 +3,63 @@
   import { AtemClient } from "./atemclient.js";
   import Feather from "./Feather.svelte";
 
-  let atem = new AtemClient(window.location.origin.replace("http", "ws") + "/ws");
+  let websocket;
+  let intervalID;
+  let atem = new AtemClient(websocket);
   window.atem = atem;
   let currentME = 0;
   let unsubscribe;
 
-  onMount(() => {
-    document.addEventListener("keyup", onKeyUp);
-    unsubscribe = atem.store.subscribe(value => {atem = value});
-  });
+  function deepSet(obj, path, value) {
+      for (var i = 0, path = path.split('.'), len = path.length - 1; i < len; i++) {
+          if (Array.isArray(obj)) {
+              obj = obj[+path[i]];
+          } else {
+              obj = obj[path[i]];
+          }
+      };
+      return obj[path[i]] = value;
+  };
+
+  function reconnect() {
+    atem.websocket = new WebSocket(window.location.origin.replace("http", "ws") + "/ws")
+    atem.wsconnected = false;
+    atem.websocket.addEventListener("open", function (event) {
+        console.log("Websocket opened");
+        intervalID = clearTimeout(intervalID);
+        atem.wsconnected = true;
+    });
+    atem.websocket.addEventListener("message", (event) => {
+        const { path, state } = JSON.parse(event.data);
+        console.log(path, state);
+        deepSet(atem, path, state)
+        if (path === 'state' || path === 'state.inputs' || path == 'connected') {
+            atem.visibleInputs = atem.getVisibleInputs();
+        }
+        atem = atem;
+    });
+    atem.websocket.addEventListener("error", () => {
+        console.log("Websocket error");
+        atem.websocket.close();
+        intervalID = setTimeout(reconnect, 1000);
+        // Svelte update connected status
+        atem.wsconnected = false;
+    });
+    atem.websocket.addEventListener("close", () => {
+        console.log("Websocket closed");
+        intervalID = setTimeout(reconnect, 1000);
+        // Svelte update connected status
+        atem.wsconnected = false;
+    });
+  }
+
+  reconnect();
 
   onMount(() => {
+    document.addEventListener("keyup", onKeyUp);
+  });
+
+  onDestroy(() => {
     unsubscribe();
   })
 
@@ -41,9 +87,9 @@
   <a href="#switcher" class="tab"><Feather icon="grid"/>Switcher</a>
   <a href="#media" class="tab"><Feather icon="film"/>Media</a>
   <a href="#macros" class="tab"><Feather icon="box"/>Macros</a>
-  <span class="tab connection-status" class:connected={atem.websocket.readyState == window.WebSocket.OPEN}
+  <span class="tab connection-status" class:connected={atem.wsconnected}
         title="Connection status: green=connected, red=disconnected">
-    {#if atem.websocket.readyState == window.WebSocket.OPEN}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
+    {#if atem.wsconnected}<Feather icon="zap"/>{:else}<Feather icon="alert-triangle"/>{/if}
     Server
   </span>
   <span class="tab connection-status" class:connected={atem.connected}
@@ -103,19 +149,19 @@
     <h3>Next Transition</h3>
     <div class="well">
       <div class="button"
-        class:yellow={ME.upstreamKeyers[0].fillSource}
-        on:click={e => atem.toggleUpstreamKeyNextBackground(ME.index)}>
+        class:yellow={ME.transitionProperties.selection & 1}
+        on:click={e => atem.toggleUpstreamKeyNext(0, ME.index)}>
         <p>BKGD</p>
       </div>
-      {#each ME.upstreamKeyers as keyer}
+      {#each ME.upstreamKeyers as keyer, i}
         <div class="button"
           class:red={keyer.onAir}
-          on:click={e => atem.setkeyerOnAir(!keyer.onAir, ME, keyer.upstreamKeyerId)}>
+          on:click={e => atem.setkeyerOnAir(!keyer.onAir, ME.index, keyer.upstreamKeyerId)}>
           <p>ON<br />AIR</p>
         </div>
         <div class="button"
-          class:yellow={keyer.flyEnabled}
-          on:click={e => atem.setUpstreamKeyerFly(!keyer.flyEnabled, ME, keyer.upstreamKeyerId)}>
+          class:yellow={ME.transitionProperties.selection & (1<<(i+1))}
+          on:click={e => atem.toggleUpstreamKeyNext(i+1, ME.index)}>
           <p>Key {keyer.upstreamKeyerId+1}</p>
         </div>
       {/each}
