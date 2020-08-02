@@ -8,7 +8,11 @@
   let atem = new AtemClient(websocket);
   window.atem = atem;
   let currentME = 0;
+  let activeMacro = 0;
+  let activeMacroIsUsed = false;
   let unsubscribe;
+
+  $: activeMacroIsUsed = atem.state.macro.macroProperties[activeMacro].isUsed;
 
   function deepSet(obj, path, value) {
       for (var i = 0, path = path.split('.'), len = path.length - 1; i < len; i++) {
@@ -113,7 +117,7 @@
   {#each atem.state.video.ME[currentME] && [atem.state.video.ME[currentME]] as ME}
   <section class="channels">
     <h3>Mix Effects {ME.index+1} Program & Preview</h3>
-    <div class="well">
+    <div class="well row-buttons">
     {#each atem.visibleInputs[ME.index] as input}
       <div class="button"
         class:red={ME.programInput === input}
@@ -128,7 +132,7 @@
 
   <section class="transition">
     <h3>Transition</h3>
-    <div class="well">
+    <div class="well row-buttons">
       <div class="button" on:click={e=>atem.cutTransition(ME.index)}>
         <p>CUT</p>
       </div>
@@ -147,7 +151,7 @@
 
   <section class="next-transition">
     <h3>Next Transition</h3>
-    <div class="well">
+    <div class="well row-buttons">
       <div class="button"
         class:yellow={ME.transitionProperties.selection & 1}
         on:click={e => atem.toggleUpstreamKeyNext(0, ME.index)}>
@@ -170,7 +174,7 @@
 
   <section class="transition-style">
     <h3>Transition style</h3>
-    <div class="well">
+    <div class="well row-buttons">
       <div class="button"
         class:yellow={ME.transitionProperties.style == 0}
         on:click={e => atem.setTransitionStyle(0, ME.index)}>
@@ -210,7 +214,7 @@
 
   <section class="fade-to-black">
     <h3>Fade to Black</h3>
-    <div class="well">
+    <div class="well row-buttons">
       <div class="button"
         class:red={ME.fadeToBlack.isFullyBlack}
         on:click={e=>atem.fadeToBlack(ME.index)}>
@@ -224,7 +228,7 @@
   {#each Object.keys(atem.state.video.downstreamKeyers) as key}
   <section class="downstream-key">
     <h3>Downstream Key {+key+1}</h3>
-    <div class="well">
+    <div class="well row-buttons">
       <div class="button"
         class:yellow={atem.state.video.downstreamKeyers[key].properties.tie}
         on:click={e => atem.setDownstreamKeyTie(!atem.state.video.downstreamKeyers[key].properties.tie, +key)}>
@@ -259,25 +263,76 @@
   {/each}
 </div><!-- screen media-->
 
-<div id="macros" class="screen">
-  <h2>Macros</h2>
-  <div class="well">
-    <div class="button"
-      class:red={atem.state.macro.macroPlayer.isRunning}
-      on:click={atem.macroStop}>
-      <p>STOP</p>
+<div id="macros" class="screen" class:running={atem.state.macro.macroPlayer.isRunning}>
+  <h2>Macros
+    {#if atem.state.macro.macroPlayer.isRunning}
+    <div class="gray-button active"
+      on:click={e=>atem.macroStop()}>
+      <Feather icon="square" size=14/> Stop
     </div>
-    <div class="button-group vertical">
-    {#each atem.state.macro.macroProperties as macro}
-      {#if macro.isUsed}
-      <div class="gray-button"
-        class:red={macro.macroIndex == atem.state.macro.macroPlayer.macroIndex}
-        on:click={e=>atem.macroRun(macro.macroIndex)}
-        title={macro.description}>
-        <p>{macro.name}</p>
+    {:else}
+    <div class="gray-button"
+      on:click={e=>atem.macroRun(activeMacro)}>
+      <Feather icon="play" size=14/> Play
+    </div>
+    {/if}
+
+    <div class="gray-button"
+      class:active={atem.state.macro.macroPlayer.loop}
+      on:click={e=>atem.macroToggleLoop()}>
+      <Feather icon="repeat" size=14/> Loop
+    </div>
+
+    {#if atem.state.macro.macroRecorder.isRecording}
+      <div class="gray-button red"
+        on:click={e=>atem.macroStopRecord()}>
+        <Feather icon="stop-circle" size=14/> Stop Record
       </div>
-      {/if}
-    {/each}
+    {:else}
+      <div class="gray-button"
+        on:click={e=>{
+        let name;
+        if (name = prompt('Name:', atem.state.macro.macroProperties[activeMacro].name))
+            atem.macroRecord(activeMacro, name, '')
+          }}>
+        <Feather icon="plus-circle" size=14/> Record
+      </div>
+    {/if}
+
+    <div class="gray-button"
+      class:disabled={!activeMacroIsUsed}
+      on:click={e=> {
+        let name;
+        if (activeMacroIsUsed &&
+            (name = prompt('Name:', atem.state.macro.macroProperties[activeMacro].name)))
+          atem.macroSetName(activeMacro, name)
+      }}>
+      <Feather icon="edit-3" size=14/> Name
+    </div>
+
+    <div class="gray-button"
+      class:disabled={!activeMacroIsUsed}
+      on:click={e=> {
+        if (activeMacroIsUsed &&
+            confirm('Are you sure, you want to delete this macro:'))
+          atem.macroDelete(activeMacro)
+      }}>
+      <Feather icon="minus-circle" size=14/> Delete
+    </div>
+  </h2>
+
+  <div class="macro-scroll">
+    <div class="macro-row">
+      <div class="macro-buttons">
+      {#each atem.state.macro.macroProperties as macro, i}
+        <div class="gray-button"
+          class:red={macro.macroIndex == atem.state.macro.macroPlayer.macroIndex}
+          class:disabled={!macro.isUsed}
+          class:active={activeMacro == i}
+          on:click={e=>activeMacro=i}
+          title={macro.description}>{macro.name}</div>
+      {/each}
+      </div>
     </div>
   </div>
 </div> <!-- screen macros -->

@@ -3,7 +3,6 @@
     but this communicates via websocket to node server
 */
 const defaultState = require('./state.constellation.json');
-const { writable } = require('svelte/store');
 
 
 class AtemClient {
@@ -191,12 +190,23 @@ class AtemClient {
         this.sendMessage({ method: 'MacroActionCommand', params: { index, action: 0 } });
     }
     macroStop() {
-        console.log("macroStop");
         this.sendMessage({ method: 'MacroActionCommand', params: { index: 0, action: 1 } });
     }
     macroStopRecord() {
-        console.log("macroStopRecord");
         this.sendMessage({ method: 'MacroActionCommand', params: { index: 0, action: 2 } });
+    }
+    macroDelete(index) {
+        this.sendMessage({ method: 'MacroActionCommand', params: { index, action: 5 } });
+    }
+    macroSetName(index, name) {
+        this.sendMessage({ method: 'MacroChangePropertiesCommand', params: { index, name } });
+    }
+    macroRecord(index, name, description) {
+        this.sendMessage({ method: 'MacroRecordCommand', params: { index, name, description } });
+    }
+    macroToggleLoop() {
+        const loop = !atem.state.macro.macroPlayer.loop;
+        this.sendMessage({ method: 'MacroRunChangeProperties', params: { loop } });
     }
 
     uploadMediaFile(file, index) {

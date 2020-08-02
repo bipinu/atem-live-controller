@@ -117,20 +117,25 @@ app.ws('/ws', function (ws, req) {
         }
         break;
       default:
-        const command = new Commands[method]();
-        if (params.mixEffect){
+        const Command = Commands[method];
+        if (Command === undefined) {
+          console.error('Undefined command', method)
+          return;
+        };
+        const command = new Command();
+        if (params.mixEffect !== undefined){
           command.mixEffect = params.mixEffect;
           delete params.mixEffect;
         }
-        if (params.upstreamKeyerId){
+        if (params.upstreamKeyerId !== undefined){
           command.upstreamKeyerId = params.upstreamKeyerId;
           delete params.upstreamKeyerId;
         }
-        if (params.downstreamKeyerId){
+        if (params.downstreamKeyerId !== undefined){
           command.downstreamKeyerId = params.downstreamKeyerId;
           delete params.downstreamKeyerId;
         }
-        if (params.index){
+        if (params.index !== undefined){
           command.index = params.index;
           delete params.index;
         }

@@ -102,11 +102,13 @@ section h3 {
 	background: #222;
 	border-radius: 7px;
   box-shadow: 0px 0px 3px black inset;
-  display: inline-flex;
-  flex-flow: wrap;
 	padding: 10px;
   position: relative;
 	z-index: 0;
+}
+.row-buttons {
+  display: inline-flex;
+  flex-flow: wrap;
 }
 
 section.transition {
@@ -234,39 +236,43 @@ section.transition {
 }
 /* Gray button */
 .gray-button {
+  box-sizing: border-box;
   background-image: linear-gradient(to bottom, #2e2e2e, #222222);
   color: #8c8c8c;
   border: none;
-  border-radius: 1rem;
+  border-radius: .3rem;
   font-size: .8rem;
   font-weight: 300;
-  line-height: 1.7rem;
-  padding: 0 1.7rem;
-  border-top: 1px solid #3b3b3b;
+  line-height: 2rem;
+  padding: 0 0.7rem;
+  border: 1px solid #3b3b3b;
   cursor: pointer;
+  display: inline-block;
+  vertical-align: top;
 }
 .gray-button.active {
   background-image: linear-gradient(to bottom, #222222, #2e2e2e);
-  /* color: orange; */
-  color: #CE6203;
+  border: 1px solid #CE6203;
 }
-
+.gray-button.disabled {
+  color: #666;
+}
 .button-group {
   box-shadow: 1px 1px 2px black;
   border: 1px solid black;
-  border-radius: 1rem;
+  border-radius: .5rem;
 }
 .button-group.horizontal .gray-button{
   border-right: 1px solid black;
   border-radius: 0;
 }
 .button-group.horizontal .gray-button:first-child {
-  border-top-left-radius: 1rem;
-  border-bottom-left-radius: 1rem;
+  border-top-left-radius: .5rem;
+  border-bottom-left-radius: .5rem;
 }
 .button-group.horizontal .gray-button:last-child {
-  border-top-right-radius: 1rem;
-  border-bottom-right-radius: 1rem;
+  border-top-right-radius: .5rem;
+  border-bottom-right-radius: .5rem;
   border-right: none;
 }
 .button-group.vertical .gray-button{
@@ -275,12 +281,12 @@ section.transition {
 }
 
 .button-group.vertical .gray-button:first-child {
-  border-top-left-radius: 1rem;
-  border-top-right-radius: 1rem;
+  border-top-left-radius: .5rem;
+  border-top-right-radius: .5rem;
 }
 .button-group.vertical .gray-button:last-child {
-  border-bottom-left-radius: 1rem;
-  border-bottom-right-radius: 1rem;
+  border-bottom-left-radius: .5rem;
+  border-bottom-right-radius: .5rem;
 }
 
 #switcher {
@@ -319,4 +325,27 @@ section.transition {
 
 .media-thumb input {
   visibility: hidden;
+}
+
+.macro-scroll {
+  max-width: 100%;
+  overflow-x: scroll;
+}
+.macro-row {
+  width: 80rem;
+}
+.macro-buttons {
+  display: block;
+  columns: 5;
+}
+.macro-buttons .gray-button {
+  width: 7rem;
+  min-height: 2rem;
+  margin-bottom: .5rem;
+}
+.macro-buttons .gray-button:nth-child(2n-1) {
+  margin-right: .5rem;
+}
+#macros.running {
+  border: 3px solid #CE6203;
 }
