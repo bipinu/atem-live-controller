@@ -88,6 +88,7 @@ h2 {
 }
 section {
   margin: 0 1rem 1rem 0;
+  display: inline-block;
 }
 
 section h3 {

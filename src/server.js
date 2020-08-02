@@ -1,6 +1,6 @@
 const express    = require('express');
 const fileUpload = require('express-fileupload');
-const { Atem, Commands, listVisibleInputs } = require('atem-connection')
+const { Atem, Commands } = require('atem-connection')
 const config     = require('../config.json');
 
 const app = express();
@@ -14,9 +14,10 @@ let CLIENTS = expressWs.getWss().clients;
 let device = 0;
 for (var switcher of config.switchers) {
   console.log('Initializing switcher', switcher.addr, switcher.port)
-  atem = new Atem({ externalLog: console.log })
+  atem = new Atem({ externalLog: console.log, debug: true })
   atem.connect(switcher.addr);
   atem.state.device = device;
+  atem.connected = false;
   switchers.push(atem);
 
   atem.on('stateChanged', function (state, path) {
@@ -52,10 +53,12 @@ for (var switcher of config.switchers) {
   });
   atem.on('connected', () => {
     console.log('atem connected');
+    atem.connected = true;
     broadcast(JSON.stringify({ path: 'connected', state: true }));
   });
   atem.on('disconnected', (err) => {
     console.log('atem disconnected');
+    atem.connected = false;
     broadcast(JSON.stringify({ path: 'connected', state: false }));
   });
   atem.on('error', (err) => {
@@ -93,6 +96,7 @@ app.ws('/ws', function (ws, req) {
   console.log(ip, 'connected');
   // initialize client with switcher state
   ws.send(JSON.stringify({ path: "state", state: switchers[0].state }));
+  ws.send(JSON.stringify({ path: 'connected', state: switchers[0].connected }));
 
   ws.on('message', function incoming(message) {
     /* JSON-RPC v2 compatible call */

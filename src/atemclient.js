@@ -168,23 +168,23 @@ class AtemClient {
 
     toggleUpstreamKeyNext(index, mixEffect) {
         const selection = this.state.video.ME[mixEffect].transitionProperties.selection ^ (1 << index);
-        this.setTransitionStyle({selection}, mixEffect);
-    };
+        this.sendMessage({ method: 'TransitionPropertiesCommand', params: { selection, mixEffect } });
+    }
 
-    setTransitionStyle(properties, mixEffect) {
-        this.sendMessage({ method: 'TransitionPropertiesCommand', params: { properties, mixEffect } });
-    };
+    setTransitionStyle(style, mixEffect) {
+        this.sendMessage({ method: 'TransitionPropertiesCommand', params: { style, mixEffect } });
+    }
 
     setUpstreamKeyerFly(flyEnabled, mixEffect, upstreamKeyerId) {
         this.sendMessage({ method: 'MixEffectKeyTypeSetCommand', params: { flyEnabled, mixEffect, upstreamKeyerId } });
-    };
+    }
 
     setUpstreamKeyerOnAir(onAir, mixEffect, upstreamKeyerId) {
         this.sendMessage({
             method: 'MixEffectKeyOnAirCommand',
             params: { mixEffect, upstreamKeyerId, onAir }
-        });
-    };
+        })
+    }
 
     macroRun(index) {
         console.log("macroRun ", index);
