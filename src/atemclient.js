@@ -209,6 +209,22 @@ class AtemClient {
         this.sendMessage({ method: 'MacroRunChangeProperties', params: { loop } });
     }
 
+    mediaPlayerStart(mediaPlayerId) {
+        this.sendMessage({ method: 'MediaPlayerStatusCommand', params: { mediaPlayerId, playing: 1 } });
+    }
+    mediaPlayerStop(mediaPlayerId) {
+        this.sendMessage({ method: 'MediaPlayerStatusCommand', params: { mediaPlayerId, playing: 0 } });
+    }
+    mediaPlayerToggleLoop(mediaPlayerId) {
+        const loop = !atem.state.media.players[mediaPlayerId].loop;
+        this.sendMessage({ method: 'MediaPlayerStatusCommand', params: { mediaPlayerId, loop } });
+    }
+    setPlayerStillSource(stillIndex, mediaPlayerId) {
+        this.sendMessage({ method: 'MediaPlayerSourceCommand', params: { mediaPlayerId, stillIndex, sourceType: 1 } });
+    }
+    setPlayerClipSource(clipIndex, mediaPlayerId) {
+        this.sendMessage({ method: 'MediaPlayerSourceCommand', params: { mediaPlayerId, clipIndex, sourceType: 2 } });
+    }
     uploadMediaFile(file, index) {
         let img, reader;
         let atem = this;

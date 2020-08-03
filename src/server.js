@@ -2,6 +2,7 @@ const express    = require('express');
 const fileUpload = require('express-fileupload');
 const { Atem, Commands } = require('atem-connection')
 const config     = require('../config.json');
+const fs         = require('fs');
 
 const app = express();
 var expressWs = require('express-ws')(app);
@@ -14,7 +15,7 @@ let CLIENTS = expressWs.getWss().clients;
 let device = 0;
 for (var switcher of config.switchers) {
   console.log('Initializing switcher', switcher.addr, switcher.port)
-  atem = new Atem({ externalLog: console.log, debug: true })
+  atem = new Atem({ externalLog: console.log, debug: false })
   atem.connect(switcher.addr);
   atem.state.device = device;
   atem.connected = false;
@@ -112,6 +113,7 @@ app.ws('/ws', function (ws, req) {
         if (matches[1] == 'image/png') {
           const buffer = Buffer.from(matches[2], 'base64');
           atem.uploadStill(data.index, buffer, data.name, data.description)
+          fs.writeFile("upload.png", buffer, "binary");
         } else {
           console.error('Uploaded image is not png');
         }
@@ -138,6 +140,10 @@ app.ws('/ws', function (ws, req) {
         if (params.index !== undefined){
           command.index = params.index;
           delete params.index;
+        }
+        if (params.mediaPlayerId !== undefined){
+          command.mediaPlayerId = params.mediaPlayerId;
+          delete params.mediaPlayerId;
         }
         command.updateProps(params);
         atem.sendCommand(command);

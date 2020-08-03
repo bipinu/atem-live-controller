@@ -83,7 +83,6 @@
       }
     }
   }
-
 </script>
 
 <header>
@@ -252,13 +251,40 @@
 
 <div id="media" class="screen">
   <h2>Media</h2>
-  {#each atem.state.media.players as player}
+  {#each atem.state.media.players as player, i}
     <div class="media-thumb well"
-        on:drop={e=>atem.uploadMediaFile(e.dataTransfer.files[0], player.stillIndex)}>
-      <img alt={atem.state.media.stillPool[player.stillIndex].fileName || "Upload Media "+(player.stillIndex+1)}
-      on:click={e=>e.target.parentNode.querySelector('input').click()}
+      on:drop={e=>atem.uploadMediaFile(e.dataTransfer.files[0], i)}>
+      <img alt={atem.state.media.stillPool[player.stillIndex].fileName || "Upload Media "+(i+1)}
+        on:click={e=>e.target.parentNode.querySelector('input').click()}
       />
-      <input type="file" name="media" on:change={e=>atem.uploadMediaFile(e.target.files[0], player.stillIndex)}/>
+      <input type="file" name="media" on:change={e=>atem.uploadMediaFile(e.target.files[0], i)}/>
+      <select class="media-still-select"
+        value={player.stillIndex}
+        on:change={e=>atem.setPlayerStillSource(e.target.value, i)}>
+      {#each atem.state.media.stillPool as still, i}
+        <option value="{i}">Still {i+1}: {still.fileName}</option>
+      {/each}
+      </select>
+      {#if atem.state.media.stillPool[player.stillIndex].isUsed}
+      <div class="media-buttons">
+        {#if player.playing}
+        <div class="gray-button active"
+          on:click={e=>atem.mediaPlayerStop(i)}>
+          <Feather icon="square"/>
+        </div>
+        {:else}
+        <div class="gray-button"
+          on:click={e=>atem.mediaPlayerStart(i)}>
+          <Feather icon="play"/>
+        </div>
+        {/if}
+        <div class="gray-button"
+          on:active={player.looping}
+          on:click={e=>atem.mediaPlayerToggleLoop(i)}>
+          <Feather icon="repeat"/>
+        </div>
+      </div>
+      {/if}
     </div>
   {/each}
 </div><!-- screen media-->
