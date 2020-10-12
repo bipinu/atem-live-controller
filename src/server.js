@@ -4,6 +4,8 @@ const ATEM = require('applest-atem');
 const FileUploader = ATEM.FileUploader
 const config     = require('../config.json');
 const fs         = require('fs');
+const request = require('request');
+const storage = require('node-persist');
 
 const app = express();
 var expressWs = require('express-ws')(app);
@@ -47,9 +49,27 @@ function broadcast(message) {
 function updateEsp32s(state){
   console.log("updating ESP32s...");
   console.log("Tallys: "+state.tallys);
-  console.log("Preview: "+state.video.ME[0].previewInput);
-  console.log("Program: "+state.video.ME[0].programInput);
+  var previewInput = state.video.ME[0].previewInput;
+  var programInput = state.video.ME[0].programInput;
+  console.log("Preview: "+previewInput);
+  console.log("Program: "+programInput);
+
+  var cam_url = "http://192.168.0.130/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
+  request(cam_url, { json: true }, (err, res, body) => {
+    if (err) { return console.log(err); }
+    console.log(body.url);
+    console.log(body.explanation);
+  });
 }
+
+function getCamUrl(){
+//Logic to retrieve all camera URLs
+}
+
+app.get("/update_cam_id/cam/:camId/ip/:ip", function (req, resp) {
+//https://github.com/simonlast/node-persist
+//  Store all in a json so reading/looping/updating is easier {cams : {one: ip, two: ip, three: ip}}
+});
 
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },

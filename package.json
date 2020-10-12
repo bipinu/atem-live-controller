@@ -17,6 +17,8 @@
     "express-fileupload": "^1.1.7-alpha.3",
     "express-ws": "^4.0.0",
     "feather-icons": "^4.28.0",
+    "node-persist": "^3.1.0",
+    "request": "^2.88.2",
     "ws": "^7.3.0"
   },
   "devDependencies": {
