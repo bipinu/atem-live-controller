@@ -23,8 +23,9 @@ for (var switcher of config.switchers) {
   switchers.push(atem);
 
   atem.on('stateChanged', (err, state) => {
-    // console.log('atem stateChanged')
+    console.log('atem stateChanged')
     broadcast(JSON.stringify(state));
+    updateEsp32s(state);
   })
   atem.on('connect', (err) => {
     console.log('atem connected');
@@ -41,6 +42,13 @@ function broadcast(message) {
   for (var client of CLIENTS) {
     client.send(message);
   }
+}
+
+function updateEsp32s(state){
+  console.log("updating ESP32s...");
+  console.log("Tallys: "+state.tallys);
+  console.log("Preview: "+state.video.ME[0].previewInput);
+  console.log("Program: "+state.video.ME[0].programInput);
 }
 
 app.use(fileUpload({

@@ -26,6 +26,9 @@
       let data = JSON.parse(event.data);
       let device = data.device || 0;
       console.log(data);
+      // console.log("Preview: "+data.video.ME[0].previewInput);
+      // console.log("Program: "+data.video.ME[0].programInput);
+
       switch (data.method) {
         case 'connect':
           switchers[device].connected = true;
