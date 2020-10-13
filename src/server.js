@@ -5,10 +5,18 @@ const FileUploader = ATEM.FileUploader
 const config     = require('../config.json');
 const fs         = require('fs');
 const request = require('request');
-const storage = require('node-persist');
+const nodeStorage = require('node-persist');
+
+initiateNodeStorage().then(() => {
+  console.info("Storage Initiated");
+});
 
 const app = express();
 var expressWs = require('express-ws')(app);
+
+async function initiateNodeStorage(){
+  await nodeStorage.init();
+}
 
 let atem;
 const switchers = [];
@@ -48,28 +56,42 @@ function broadcast(message) {
 
 function updateEsp32s(state){
   console.log("updating ESP32s...");
-  console.log("Tallys: "+state.tallys);
   var previewInput = state.video.ME[0].previewInput;
   var programInput = state.video.ME[0].programInput;
-  console.log("Preview: "+previewInput);
-  console.log("Program: "+programInput);
+  console.log("Tallys: "+state.tallys+"Preview: "+previewInput+"Program: "+programInput);
 
-  var cam_url = "http://192.168.0.130/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
-  request(cam_url, { json: true }, (err, res, body) => {
-    if (err) { return console.log(err); }
-    console.log(body.url);
-    console.log(body.explanation);
+  getCamUrl(previewInput, programInput).then(ipAddresses => {
+    var url, urls = [];
+    ipAddresses.forEach(function (ipAddress){
+      url = "http://"+ipAddress+"/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
+      request(url, { json: true }, (err, res, body) => {
+        if (err) { return console.log(err); }
+        console.log(body.url);
+        console.log(body.explanation);
+      });
+      urls.push(url);
+    });
+    console.log(urls)
   });
 }
 
-function getCamUrl(){
-//Logic to retrieve all camera URLs
+async function getCamUrl(preview, program){
+  let ipAddresses = await nodeStorage.values();
+  return ipAddresses;
 }
 
 app.get("/update_cam_id/cam/:camId/ip/:ip", function (req, resp) {
-//https://github.com/simonlast/node-persist
-//  Store all in a json so reading/looping/updating is easier {cams : {one: ip, two: ip, three: ip}}
+  var camId = req.params.camId;
+  var ipaddress = req.params.ip;
+  console.info("Camera Id: "+camId + " & IP Address: "+ipaddress);
+  updateCamIp(camId, ipaddress).then(() => {
+    console.log("Ip updated");
+  });
 });
+
+async function updateCamIp(camId, ipaddress){
+  return await nodeStorage.setItem(camId, ipaddress);
+}
 
 app.use(fileUpload({
   limits: { fileSize: 50 * 1024 * 1024 },
