@@ -5,6 +5,20 @@ const FileUploader = ATEM.FileUploader
 const config     = require('../config.json');
 const fs         = require('fs');
 const request = require('request');
+const ciao = require("@homebridge/ciao");
+
+const responder = ciao.getResponder();
+const httpService = responder.createService({
+  name: 'ATEM Controller',
+  hostname: 'atem-daddy',
+  type: 'http',
+  port: 8080
+});
+httpService.advertise().then(() => {
+  // stuff you do when the service is published
+  console.log("service is published :)");
+});
+
 // const nodeStorage = require('node-persist');
 
 // initiateNodeStorage().then(() => {
