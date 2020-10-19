@@ -4,8 +4,22 @@ const ATEM = require('applest-atem');
 const FileUploader = ATEM.FileUploader
 const config     = require('../config.json');
 const fs         = require('fs');
-const request = require('request');
-const nodeStorage = require('node-persist');
+const nodeStorage = require("node-persist");
+const axios = require('axios').default;
+const ciao = require("@homebridge/ciao");
+
+const responder = ciao.getResponder();
+const httpService = responder.createService({
+  name: 'ATEM Controller',
+  hostname: 'atem-daddy',
+  type: 'http',
+  port: 8080
+});
+
+httpService.advertise().then(() => {
+  // stuff you do when the service is published
+  console.log("service is published :)");
+});
 
 initiateNodeStorage().then(() => {
   console.info("Storage Initiated");
@@ -54,20 +68,25 @@ function broadcast(message) {
   }
 }
 
-function updateEsp32s(state){
+async function updateEsp32s(state) {
   console.log("updating ESP32s...");
+  console.log(await nodeStorage.values());
   var previewInput = state.video.ME[0].previewInput;
   var programInput = state.video.ME[0].programInput;
-  console.log("Tallys: "+state.tallys+"Preview: "+previewInput+"Program: "+programInput);
+  console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
 
-  getCamUrl(previewInput, programInput).then(ipAddresses => {
+  getCamUrl().then(ipAddresses => {
     var url, urls = [];
     ipAddresses.forEach(function (ipAddress){
       url = "http://"+ipAddress+"/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
-      request(url, { json: true }, (err, res, body) => {
-        if (err) { return console.log(err); }
-        console.log(body.url);
-        console.log(body.explanation);
+      console.info("URL to be invoked: "+url);
+      axios.get(url)
+      .then(function (response) {
+        console.log("Invoked: "+ url);
+      }).catch(function (error) {
+        console.log("Error while invoking: "+ url);
+      }).then(function (){
+          console.log("Why even here?: "+ url);
       });
       urls.push(url);
     });
@@ -75,7 +94,7 @@ function updateEsp32s(state){
   });
 }
 
-async function getCamUrl(preview, program){
+async function getCamUrl(){
   let ipAddresses = await nodeStorage.values();
   return ipAddresses;
 }
@@ -90,7 +109,9 @@ app.get("/update_cam_id/cam/:camId/ip/:ip", function (req, resp) {
 });
 
 async function updateCamIp(camId, ipaddress){
-  return await nodeStorage.setItem(camId, ipaddress);
+  let storageStatus = await nodeStorage.setItem(camId, ipaddress);
+  console.log(await nodeStorage.values());
+  return storageStatus;
 }
 
 app.use(fileUpload({
