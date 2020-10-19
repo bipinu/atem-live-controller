@@ -12,6 +12,7 @@
   "author": "Filip Hanes <filip.hanes@protonmail.com>",
   "license": "MIT",
   "dependencies": {
+    "@homebridge/ciao": "^1.0.12",
     "applest-atem": "^0.2.4",
     "axios": "^0.20.0",
     "express": "^4.17.1",
