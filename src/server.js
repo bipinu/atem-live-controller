@@ -7,6 +7,9 @@ const fs         = require('fs');
 const nodeStorage = require("node-persist");
 const axios = require('axios').default;
 const ciao = require("@homebridge/ciao");
+const SerialPort = require('serialport')
+// const Readline = require('@serialport/parser-readline')
+const port = new SerialPort("/dev/tty.SLAB_USBtoUART", { baudRate: 115200 })
 
 const responder = ciao.getResponder();
 const httpService = responder.createService({
@@ -70,15 +73,21 @@ function broadcast(message) {
 
 async function updateEsp32s(state) {
   console.log("updating ESP32s...");
-  console.log(await nodeStorage.values());
   var previewInput = state.video.ME[0].previewInput;
   var programInput = state.video.ME[0].programInput;
   console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
+  let serialData = "preview/"+previewInput+"/program/"+programInput;
+  console.info("Serial Data to be sent: " +serialData);
+  port.write(serialData, function(err) {
+    if (err) {
+      return console.log('Error on write: ', err.message)
+    }
+    console.log('message written')
+  })
+  return;
+  console.log(await nodeStorage.values());
 
-  getCamUrl().then(ipAddresses => {
-    var url, urls = [];
-    ipAddresses.forEach(function (ipAddress){
-      url = "http://"+ipAddress+"/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
+      url = "http://atem-master.local/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
       console.info("URL to be invoked: "+url);
       axios.get(url)
       .then(function (response) {
@@ -88,10 +97,6 @@ async function updateEsp32s(state) {
       }).then(function (){
           console.log("Why even here?: "+ url);
       });
-      urls.push(url);
-    });
-    console.log(urls)
-  });
 }
 
 async function getCamUrl(){
