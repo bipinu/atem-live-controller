@@ -99,6 +99,17 @@ async function getCamUrl(){
   return ipAddresses;
 }
 
+async function removeEntry(key){
+  console.info(await nodeStorage.keys());
+  console.info(await nodeStorage.removeItem(key));
+  console.info(await nodeStorage.values());
+}
+
+app.get("/remove/cam/:camId", function (req, resp) {
+  var camId = req.params.camId;
+  removeEntry(camId);
+});
+
 app.get("/update_cam_id/cam/:camId/ip/:ip", function (req, resp) {
   var camId = req.params.camId;
   var ipaddress = req.params.ip;
