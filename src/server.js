@@ -73,10 +73,26 @@ function broadcast(message) {
 
 async function updateEsp32s(state) {
   console.log("updating ESP32s...");
-  var previewInput = state.video.ME[0].previewInput;
-  var programInput = state.video.ME[0].programInput;
-  console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
-  let serialData = "preview/"+previewInput+"/program/"+programInput;
+  // var previewInput = state.video.ME[0].previewInput;
+  // var programInput = state.video.ME[0].programInput;
+  // console.info(typeof state.tallys);
+  console.info(state.tallys);
+  // console.info(state.tallys.0);
+  let tally = state.tallys;
+  // console.info(typeof tallyString);
+  // let tallyArray = tallyString.split(",");
+
+  for(let counter = 0; counter < 4; counter++){
+    if(tally[counter] == 2){
+      var previewInput = counter+1;
+    }else if(tally[counter] == 1){
+      var programInput = counter+1;
+    }
+  }
+
+  // console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
+  // let serialData = "preview/"+previewInput+"/program/"+programInput;
+  let serialData = previewInput+""+programInput;
   console.info("Serial Data to be sent: " +serialData);
   port.write(serialData, function(err) {
     if (err) {
