@@ -19,6 +19,9 @@ const httpService = responder.createService({
   port: 8080
 });
 
+var previewCam = 0;
+var programCam = 0;
+
 httpService.advertise().then(() => {
   // stuff you do when the service is published
   console.log("service is published :)");
@@ -52,6 +55,7 @@ for (var switcher of config.switchers) {
   atem.on('stateChanged', (err, state) => {
     console.log('atem stateChanged')
     broadcast(JSON.stringify(state));
+    // console.info(state);
     updateEsp32s(state);
   })
   atem.on('connect', (err) => {
@@ -73,27 +77,28 @@ function broadcast(message) {
 
 async function updateEsp32s(state) {
   console.log("updating ESP32s...");
-  // var previewInput = state.video.ME[0].previewInput;
-  // var programInput = state.video.ME[0].programInput;
-  // console.info(typeof state.tallys);
-  console.info(state.tallys);
-  // console.info(state.tallys.0);
+  var previewInput, programInput;
   let tally = state.tallys;
-  // console.info(typeof tallyString);
-  // let tallyArray = tallyString.split(",");
+  console.info(tally);
 
   for(let counter = 0; counter < 4; counter++){
     if(tally[counter] == 2){
-      var previewInput = counter+1;
+      previewInput = counter+1;
     }else if(tally[counter] == 1){
-      var programInput = counter+1;
+      programInput = counter+1;
     }
   }
 
-  // console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
-  // let serialData = "preview/"+previewInput+"/program/"+programInput;
-  let serialData = previewInput+""+programInput;
+  if(previewInput == previewCam && programInput == programCam){
+    console.info("Camera's haven't changed...");
+    return;
+  }
+
+  previewCam = previewInput;
+  programCam = programInput;
+  let serialData = previewCam+""+programCam;
   console.info("Serial Data to be sent: " +serialData);
+
   port.write(serialData, function(err) {
     if (err) {
       return console.log('Error on write: ', err.message)
@@ -101,18 +106,6 @@ async function updateEsp32s(state) {
     console.log('message written')
   })
   return;
-  console.log(await nodeStorage.values());
-
-      url = "http://atem-master.local/esp32/updateLED/preview/"+previewInput+"/program/"+programInput;
-      console.info("URL to be invoked: "+url);
-      axios.get(url)
-      .then(function (response) {
-        console.log("Invoked: "+ url);
-      }).catch(function (error) {
-        console.log("Error while invoking: "+ url);
-      }).then(function (){
-          console.log("Why even here?: "+ url);
-      });
 }
 
 async function getCamUrl(){
