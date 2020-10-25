@@ -55,8 +55,8 @@ for (var switcher of config.switchers) {
   atem.on('stateChanged', (err, state) => {
     console.log('atem stateChanged')
     broadcast(JSON.stringify(state));
-    // console.info(state);
     updateEsp32s(state);
+    // console.info(state);
   })
   atem.on('connect', (err) => {
     console.log('atem connected');
@@ -75,11 +75,10 @@ function broadcast(message) {
   }
 }
 
-async function updateEsp32s(state) {
+function updateEsp32s(state) {
   console.log("updating ESP32s...");
   var previewInput, programInput;
   let tally = state.tallys;
-  console.info(tally);
 
   for(let counter = 0; counter < 4; counter++){
     if(tally[counter] == 2){
@@ -97,11 +96,12 @@ async function updateEsp32s(state) {
   previewCam = previewInput;
   programCam = programInput;
   let serialData = previewCam+""+programCam;
-  console.info("Serial Data to be sent: " +serialData);
 
   port.write(serialData, function(err) {
+    console.info(tally);
     if (err) {
-      return console.log('Error on write: ', err.message)
+      console.log('Error on write: ', err.message)
+      return;
     }
     console.log('message written')
   })
