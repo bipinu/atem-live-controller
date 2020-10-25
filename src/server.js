@@ -16,6 +16,9 @@ const httpService = responder.createService({
   port: 8080
 });
 
+var previewCam = 0;
+var programCam = 0;
+
 httpService.advertise().then(() => {
   // stuff you do when the service is published
   console.log("service is published :)");
@@ -70,10 +73,28 @@ function broadcast(message) {
 
 async function updateEsp32s(state) {
   console.log("updating ESP32s...");
-  console.log(await nodeStorage.values());
-  var previewInput = state.video.ME[0].previewInput;
-  var programInput = state.video.ME[0].programInput;
+  var previewInput, programInput;
+
+  // let tally = state.tallys;
+  // for(let counter = 0; counter < 4; counter++){
+  //   if(tally[counter] == 2){
+  //     previewInput = counter+1;
+  //   }else if(tally[counter] == 1){
+  //     programInput = counter+1;
+  //   }
+  // }
+
+  previewInput = state.video.ME[0].previewInput;
+  programInput = state.video.ME[0].programInput;
   console.log("Tallys: " + state.tallys + "Preview: " + previewInput + " & Program: " + programInput);
+
+  if (previewInput == previewCam && programInput == programCam) {
+    console.info("Camera's haven't changed...");
+    return;
+  }
+
+  previewCam = previewInput;
+  programCam = programInput;
 
   getCamUrl().then(ipAddresses => {
     var url, urls = [];
